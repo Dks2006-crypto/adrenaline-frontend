@@ -17,30 +17,45 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <form onSubmit={handleSubmit} className="p-8 bg-white rounded-lg shadow-md w-96">
-        <h1 className="text-2xl font-bold mb-6">Вход</h1>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-blue-100 px-4">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-md bg-white/90 backdrop-blur shadow-xl rounded-2xl p-8 animate-fadeIn"
+      >
+        <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">
+          Вход
+        </h1>
+
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-3 mb-4 border rounded"
+          className="w-full p-3 mb-4 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none transition text-black"
           required
         />
+
         <input
           type="password"
           placeholder="Пароль"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-3 mb-4 border rounded"
+          className="w-full p-3 mb-6 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none transition text-black"
           required
         />
-        <button type="submit" className="w-full bg-blue-600 text-white p-3 rounded hover:bg-blue-700">
+
+        <button
+          type="submit"
+          className="w-full bg-indigo-600 text-white p-3 rounded-lg font-medium text-lg shadow-md hover:bg-indigo-700 transition"
+        >
           Войти
         </button>
-        <p className="mt-4 text-center">
-          Нет аккаунта? <a href="/register" className="text-blue-600">Регистрация</a>
+
+        <p className="mt-4 text-center text-gray-600">
+          Нет аккаунта?{' '}
+          <a href="/register" className="text-indigo-600 hover:text-indigo-800 font-medium">
+            Регистрация
+          </a>
         </p>
       </form>
     </div>

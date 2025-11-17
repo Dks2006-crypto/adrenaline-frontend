@@ -1,124 +1,93 @@
-'use client';
+"use client";
 
-import { useAuthStore } from '@/store/authStore';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import Link from 'next/link';
+import { useAuthStore } from "@/store/authStore";
+import Link from "next/link";
 
 export default function HomePage() {
-  const { user, token, loadUser } = useAuthStore();
-  const router = useRouter();
+  const { user, token } = useAuthStore();
 
-  // Загружаем пользователя при загрузке
-  useEffect(() => {
-    if (token && !user) {
-      loadUser();
-    }
-  }, [token, user, loadUser]);
-
-  // Перенаправляем в личный кабинет
-  useEffect(() => {
-    if (user && token) {
-      if (user.role_id === 2) {
-        router.push('/trainer'); // Тренер
-      } else {
-        router.push('/dashboard'); // Клиент
-      }
-    }
-  }, [user, token, router]);
-
-  // Если авторизован — показываем лоадер
-  if (token && !user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-600"></div>
-      </div>
-    );
-  }
+  const isAdmin = user?.role_id === 1;
+  const isTrainer = user?.role_id === 2;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Hero Section */}
-      <section className="container mx-auto px-6 py-20 text-center">
-        <h1 className="text-5xl md:text-6xl font-bold text-gray-800 mb-6">
+    <div className="bg-gradient-to-br from-indigo-50 to-blue-100 py-24 min-h-screen">
+      <section className="container mx-auto px-6 text-center">
+        <h1 className="text-6xl md:text-7xl font-extrabold text-blue-700 mb-8 drop-shadow-sm">
           Adrenaline Fitness
         </h1>
-        <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
-          Современный фитнес-клуб с профессиональными тренерами, групповыми занятиями и персональными тренировками.
+        <p className="text-2xl text-gray-700 mb-14 max-w-3xl mx-auto leading-relaxed">
+          Добро пожаловать в современный фитнес-клуб с тренерами, групповыми и персональными занятиями.
         </p>
 
-        {/* Кнопки */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link
-            href="/register"
-            className="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition shadow-lg"
-          >
-            Зарегистрироваться
-          </Link>
-          <Link
-            href="/login"
-            className="bg-white text-blue-600 border-2 border-blue-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-50 transition shadow-lg"
-          >
-            Войти
-          </Link>
-        </div>
+        {/* Кнопки видны только если пользователь НЕ авторизован */}
+        {!token && (
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/register" className="bg-blue-600 text-white px-10 py-4 rounded-2xl text-xl font-semibold hover:bg-blue-700 transition shadow-xl">
+              Зарегистрироваться
+            </Link>
+            <Link href="/login" className="bg-white text-blue-600 border-2 border-blue-600 px-10 py-4 rounded-2xl text-xl font-semibold hover:bg-blue-50 transition shadow-xl">
+              Войти
+            </Link>
+          </div>
+        )}
+
+        {/* Если пользователь вошёл, показываем кнопки навигации */}
+        {token && (
+          <div className="flex flex-col sm:flex-row gap-4 justify-center text-lg mt-6">
+            <Link href="/dashboard" className="text-blue-700 hover:text-blue-800 font-semibold">
+              Личный кабинет
+            </Link>
+
+            {isTrainer && (
+              <Link href="/trainer" className="text-blue-700 hover:text-blue-800 font-semibold">
+                Кабинет тренера
+              </Link>
+            )}
+
+            {isAdmin && (
+              <a
+                href="http://127.0.0.1:8000/admin"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-purple-700 hover:text-purple-800 font-semibold"
+              >
+                Админ-панель
+              </a>
+            )}
+
+            <span className="text-gray-700">Привет, {user?.name}!</span>
+          </div>
+        )}
       </section>
 
       {/* Преимущества */}
-      <section className="container mx-auto px-6 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="bg-white p-8 rounded-xl shadow-md text-center">
-            <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl">🏋️</span>
+      <section className="container mx-auto px-6 py-20">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+          <div className="bg-white p-10 rounded-3xl shadow-lg text-center hover:shadow-2xl transition">
+            <div className="bg-blue-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl font-bold text-blue-700">
+              🏋️
             </div>
-            <h3 className="text-xl font-bold mb-2">Профессиональные тренеры</h3>
-            <p className="text-gray-600">Индивидуальный подход к каждому клиенту</p>
+            <h3 className="text-2xl text-gray-800 font-bold mb-3">Профессиональные тренеры</h3>
+            <p className="text-gray-600 text-lg">Индивидуальный подход для достижения результата.</p>
           </div>
 
-          <div className="bg-white p-8 rounded-xl shadow-md text-center">
-            <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl">🗓️</span>
+          <div className="bg-white p-10 rounded-3xl shadow-lg text-center hover:shadow-2xl transition">
+            <div className="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl font-bold text-green-700">
+              📅
             </div>
-            <h3 className="text-xl font-bold mb-2">Гибкое расписание</h3>
-            <p className="text-gray-600">Групповые и персональные занятия</p>
+            <h3 className="text-2xl text-gray-800 font-bold mb-3">Гибкое расписание</h3>
+            <p className="text-gray-600 text-lg">Групповые и персональные тренировки под ваш режим.</p>
           </div>
 
-          <div className="bg-white p-8 rounded-xl shadow-md text-center">
-            <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl">💳</span>
+          <div className="bg-white p-10 rounded-3xl shadow-lg text-center hover:shadow-2xl transition">
+            <div className="bg-purple-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl font-bold text-purple-700">
+              💳
             </div>
-            <h3 className="text-xl font-bold mb-2">Удобные тарифы</h3>
-            <p className="text-gray-600">От разовых посещений до годовых абонементов</p>
+            <h3 className="text-2xl text-gray-800 font-bold mb-3">Доступные тарифы</h3>
+            <p className="text-gray-600 text-lg">Выбирайте удобный тариф — от разовых посещений до абонементов.</p>
           </div>
         </div>
       </section>
-
-      {/* Призыв к действию */}
-      <section className="bg-blue-600 text-white py-16 text-center">
-        <div className="container mx-auto px-6">
-          <h2 className="text-3xl font-bold mb-4">Готовы начать?</h2>
-          <p className="text-lg mb-8">Присоединяйтесь к нам уже сегодня!</p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/services"
-              className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
-            >
-              Посмотреть тарифы
-            </Link>
-            <Link
-              href="/schedule"
-              className="border-2 border-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
-            >
-              Расписание
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-gray-800 text-white py-8 text-center">
-        <p>&copy; 2025 Adrenaline Fitness. Все права защищены.</p>
-      </footer>
     </div>
   );
 }

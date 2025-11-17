@@ -5,61 +5,83 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 export default function RegisterPage() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    password_confirmation: '',
-  });
-
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [passwordConfirm, setPasswordConfirm] = useState('');
   const register = useAuthStore((s) => s.register);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await register(formData);
+    await register({
+      name,
+      email,
+      password,
+      password_confirmation: passwordConfirm,
+    });
     router.push('/dashboard');
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <form onSubmit={handleSubmit} className="p-8 bg-white rounded-lg shadow-md w-96">
-        <h1 className="text-2xl font-bold mb-6">Регистрация</h1>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-md bg-white/90 backdrop-blur shadow-xl rounded-2xl p-8 animate-fadeIn"
+      >
+        <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">
+          Регистрация
+        </h1>
+
         <input
           type="text"
           placeholder="Имя"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          className="w-full p-3 mb-4 border rounded"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="w-full p-3 mb-4 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none transition text-black"
           required
         />
+
         <input
           type="email"
           placeholder="Email"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          className="w-full p-3 mb-4 border rounded"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full p-3 mb-4 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none transition text-black"
           required
         />
+
         <input
           type="password"
           placeholder="Пароль"
-          value={formData.password}
-          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-          className="w-full p-3 mb-4 border rounded"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full p-3 mb-4 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none transition text-black"
           required
         />
+
         <input
           type="password"
-          placeholder="Повторите пароль"
-          value={formData.password_confirmation}
-          onChange={(e) => setFormData({ ...formData, password_confirmation: e.target.value })}
-          className="w-full p-3 mb-4 border rounded"
+          placeholder="Подтверждение пароля"
+          value={passwordConfirm}
+          onChange={(e) => setPasswordConfirm(e.target.value)}
+          className="w-full p-3 mb-6 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none transition text-black"
           required
         />
-        <button type="submit" className="w-full bg-blue-600 text-white p-3 rounded hover:bg-blue-700">
-          Зарегистрироваться
+
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white p-3 rounded-lg font-medium text-lg shadow-md hover:bg-blue-700 transition"
+        >
+          Создать аккаунт
         </button>
+
+        <p className="mt-4 text-center text-gray-600">
+          Уже есть аккаунт?{' '}
+          <a href="/login" className="text-blue-600 hover:text-blue-800 font-medium">
+            Войти
+          </a>
+        </p>
       </form>
     </div>
   );
