@@ -9,6 +9,8 @@ interface User {
   name: string;
   email: string;
   role_id: number;
+  avatar?: string | null;        // ← добавили
+  avatar_url?: string | null;    // ← добавили (самое важное!)
 }
 
 interface AuthState {
