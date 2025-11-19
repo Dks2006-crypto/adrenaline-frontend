@@ -1,4 +1,4 @@
-// src/lib/cropImage.ts
+
 export const getCroppedImg = async (
   imageSrc: string,
   pixelCrop: { x: number; y: number; width: number; height: number },

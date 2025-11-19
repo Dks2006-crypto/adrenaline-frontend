@@ -1,6 +1,7 @@
 'use client';
 
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 
@@ -9,8 +10,8 @@ interface User {
   name: string;
   email: string;
   role_id: number;
-  avatar?: string | null;        // ← добавили
-  avatar_url?: string | null;    // ← добавили (самое важное!)
+  avatar?: string | null;
+  avatar_url?: string | null;
 }
 
 interface AuthState {
@@ -23,51 +24,72 @@ interface AuthState {
   hasRole: (role: number) => boolean;
 }
 
-export const useAuthStore = create<AuthState>((set, get) => ({
-  user: null,
-  token: typeof window !== 'undefined' ? localStorage.getItem('token') : null,
-  login: async (email, password) => {
-    try {
-      const res = await api.post('/login', { email, password });
-      const { token, user } = res.data;
-      localStorage.setItem('token', token);
-      set({ token, user });
-      toast.success('Вход выполнен');
-    } catch (err: any) {
-      toast.error(err.response?.data?.error || 'Ошибка входа');
-      throw err;
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set, get) => ({
+      user: null,
+      token: null,
+
+      login: async (email, password) => {
+        const res = await api.post('/login', { email, password });
+        const { token, user } = res.data;
+
+        api.defaults.headers.Authorization = `Bearer ${token}`;
+        set({ token, user });
+
+        toast.success('Вход выполнен');
+      },
+
+      register: async (data) => {
+        const res = await api.post('/register', data);
+        const { token, user } = res.data;
+
+        api.defaults.headers.Authorization = `Bearer ${token}`;
+        set({ token, user });
+
+        toast.success('Регистрация успешна');
+      },
+
+      logout: async () => {
+        try {
+          await api.post('/logout');
+        } catch {}
+
+        set({ token: null, user: null });
+        delete api.defaults.headers.Authorization;
+
+        toast.success('Вы вышли');
+      },
+
+      loadUser: async () => {
+        try {
+          const res = await api.get('/me');
+          set({ user: res.data });
+        } catch {
+          get().logout();
+        }
+      },
+
+      hasRole: (role) => get().user?.role_id === role,
+    }),
+    {
+      name: 'auth-storage',
+
+      // ← ФИКС: сохраняем и юзера, и токен
+      partialize: (state) => ({
+        token: state.token,
+        user: state.user,
+      }),
     }
-  },
+  )
+);
 
-  register: async (data) => {
-    try {
-      const res = await api.post('/register', data);
-      const { token, user } = res.data;
-      localStorage.setItem('token', token);
-      set({ token, user });
-      toast.success('Регистрация успешна');
-    } catch (err: any) {
-      toast.error(err.response?.data?.error || 'Ошибка регистрации');
-      throw err;
-    }
-  },
+// восстановление токена и автоподгрузка
+if (typeof window !== 'undefined') {
+  const { token } = useAuthStore.getState();
 
-  logout: async () => {
-    try { await api.post('/logout'); } catch {}
-    localStorage.removeItem('token');
-    set({ user: null, token: null });
-    toast.success('Вы вышли');
-  },
-
-  loadUser: async () => {
-    try {
-      const res = await api.get('/me');
-      set({ user: res.data });
-    } catch {
-      localStorage.removeItem('token');
-      set({ user: null, token: null });
-    }
-  },
-
-  hasRole: (role) => get().user?.role_id === role,
-}));
+  if (token) {
+    api.defaults.headers.Authorization = `Bearer ${token}`;
+    useAuthStore.getState().loadUser().catch(() => {});
+  }
+}

@@ -1,4 +1,3 @@
-// components/AuthStatus.tsx
 'use client';
 
 import { useAuthStore } from '@/store/authStore';
@@ -9,8 +8,6 @@ import { useEffect, useState } from 'react';
 export default function AuthForm() {
   const { user, token } = useAuthStore();
   const router = useRouter();
-
-  // ← САМОЕ ВАЖНОЕ: ждём, пока клиент смонтируется
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -22,18 +19,17 @@ export default function AuthForm() {
     router.push('/');
   };
 
-  // Пока не смонтировались — показываем НЕЧТО, что совпадает с сервером
   if (!isMounted) {
     return (
-      <>
+      <div className="flex items-center gap-4">
         <div className="w-20 h-8 bg-gray-200 rounded animate-pulse" />
         <div className="w-32 h-10 bg-gray-200 rounded animate-pulse" />
-      </>
+      </div>
     );
   }
 
-  // Теперь рендерим настоящий контент — только на клиенте
-  if (!token || !user) {
+  // ← ВОТ ЭТО ГЛАВНОЕ ИЗМЕНЕНИЕ
+  if (!token) {
     return (
       <>
         <Link href="/login" className="text-gray-700 hover:text-blue-600 font-medium">
@@ -49,21 +45,20 @@ export default function AuthForm() {
     );
   }
 
-  const isAdmin = user.role_id === 1;
-
+  // Токен есть — показываем авторизованное состояние
   return (
     <>
       <Link href="/dashboard" className="text-gray-700 hover:text-blue-600 font-medium">
         Личный кабинет
       </Link>
 
-      {user.role_id === 2 && (
+      {user?.role_id === 2 && (
         <Link href="/trainer" className="text-gray-700 hover:text-blue-600 font-medium">
           Тренер
         </Link>
       )}
 
-      {isAdmin && (
+      {user?.role_id === 1 && (
         <a
           href="http://127.0.0.1:8000/admin"
           target="_blank"
@@ -74,7 +69,9 @@ export default function AuthForm() {
         </a>
       )}
 
-      <span className="text-gray-600 text-sm">Привет, {user.name}!</span>
+      <span className="text-gray-600 text-sm">
+        Привет, {user?.name || "друг"}!
+      </span>
 
       <button onClick={handleLogout} className="text-red-600 hover:text-red-700 font-medium">
         Выйти
