@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import api from '@/lib/api';
-import toast from 'react-hot-toast';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import api from "@/lib/api";
+import toast from "react-hot-toast";
 
 interface User {
   id: number;
@@ -31,49 +31,56 @@ export const useAuthStore = create<AuthState>()(
       token: null,
 
       login: async (email, password) => {
-        const res = await api.post('/login', { email, password });
+        const res = await api.post("/login", { email, password });
         const { token, user } = res.data;
 
         api.defaults.headers.Authorization = `Bearer ${token}`;
         set({ token, user });
 
-        toast.success('Вход выполнен');
+        toast.success("Вход выполнен");
       },
 
       register: async (data) => {
-        const res = await api.post('/register', data);
+        const res = await api.post("/register", data);
         const { token, user } = res.data;
 
         api.defaults.headers.Authorization = `Bearer ${token}`;
         set({ token, user });
 
-        toast.success('Регистрация успешна');
+        toast.success("Регистрация успешна");
       },
 
       logout: async () => {
         try {
-          await api.post('/logout');
+          await api.post("/logout");
         } catch {}
 
         set({ token: null, user: null });
         delete api.defaults.headers.Authorization;
 
-        toast.success('Вы вышли');
+        toast.success("Вы вышли");
       },
 
       loadUser: async () => {
         try {
-          const res = await api.get('/me');
+          const res = await api.get("/me");
           set({ user: res.data });
-        } catch {
-          get().logout();
+        } catch (error: any) {
+          if (error.response?.status === 401) {
+            // Просто очищаем состояние, НО НЕ ВЫЗЫВАЕМ logout()
+            set({ token: null, user: null });
+            delete api.defaults.headers.Authorization;
+            localStorage.removeItem("token");
+            // Можно показать тост
+            toast.error("Сессия истекла");
+          }
         }
       },
 
       hasRole: (role) => get().user?.role_id === role,
     }),
     {
-      name: 'auth-storage',
+      name: "auth-storage",
 
       // ← ФИКС: сохраняем и юзера, и токен
       partialize: (state) => ({
@@ -88,8 +95,7 @@ export const useAuthStore = create<AuthState>()(
 if (typeof window !== 'undefined') {
   const { token } = useAuthStore.getState();
 
-  if (token) {
+  if (token && !window.location.pathname.includes('/login')) {
     api.defaults.headers.Authorization = `Bearer ${token}`;
-    useAuthStore.getState().loadUser().catch(() => {});
   }
 }

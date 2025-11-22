@@ -19,17 +19,11 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Обработка 401 → логаут
+// Обработка 401
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Тоже проверяем наличие window перед редиректом
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('token');
-        window.location.href = '/login';
-      }
-    }
+    // Просто пробрасываем ошибку дальше — ничего не делаем автоматически
     return Promise.reject(error);
   }
 );

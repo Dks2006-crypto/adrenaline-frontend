@@ -54,6 +54,10 @@ export default function Trainers() {
       // Можно также перенаправить на страницу логина: router.push('/login');
       return;
     }
+    if (!trainerId || trainerId <= 0) {
+      toast.error("Неверный ID тренера.");
+      return;
+    }
     setSelectedTrainerId(trainerId);
     setIsModalOpen(true);
   };
@@ -105,7 +109,7 @@ export default function Trainers() {
                   </div>
                   {/* Рейтинг */}
                   <div className="absolute top-4 right-4 bg-indigo-600 text-white text-sm font-semibold px-3 py-1 rounded-full shadow-lg">
-                    ⭐️ {trainer.rating.toFixed(1)} ({trainer.reviews_count})
+                    ⭐️ {trainer.rating} ({trainer.reviews_count})
                   </div>
                 </div>
 
