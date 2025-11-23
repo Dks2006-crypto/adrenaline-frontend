@@ -10,14 +10,13 @@ const nextConfig = {
       },
       {
         protocol: 'http',
-        hostname: 'localhost',
+        hostname: '127.0.0.1',
         port: '8000',
         pathname: '/storage/**',
       },
     ],
   },
 
-  // Если используешь App Router и хочешь, чтобы всё работало без ревалидаций и т.п.
   reactStrictMode: false,
   swcMinify: true,
 };

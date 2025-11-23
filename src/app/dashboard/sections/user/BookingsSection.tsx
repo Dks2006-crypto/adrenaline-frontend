@@ -11,6 +11,7 @@ interface Booking {
     status: 'pending' | 'confirmed' | 'cancelled';
     created_at: string;
     note: string | null;
+    trainer_comment: string | null;
     form?: { // Групповое занятие
         starts_at: string;
         service: { title: string };
@@ -93,7 +94,13 @@ export default function BookingsSection() {
                         {b.note}
                     </p>
                   )}
-                  
+
+                  {b.trainer_comment && (
+                    <p className="text-blue-600 italic border-t border-gray-100 pt-2">
+                        <span className="font-medium">Ответ тренера:</span>{" "}
+                        {b.trainer_comment}
+                    </p>
+                  )}
 
                   <div className="pt-2">
                     <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(b.status)}`}>

@@ -2,12 +2,17 @@
 
 import { useAuthStore } from "@/store/authStore";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import MembershipsSection from "./sections/MembershipsSection";
-import BookingsSection from "./sections/BookingsSection";
 import ProfileSection from "./sections/ProfileSections";
+import TrainerBookingsSection from "./sections/trainer/TrainerBookingSection";
+import MembershipsSection from "./sections/user/MembershipsSection";
+import BookingsSection from "./sections/user/BookingsSection";
+
 
 export default function Dashboard() {
   const { user, logout } = useAuthStore();
+  
+  // Проверяем роль
+  const isTrainer = user?.role_id === 2;
 
   return (
     <ProtectedRoute>
@@ -29,8 +34,18 @@ export default function Dashboard() {
           {/* Все секции */}
           <div className="space-y-16">
             <ProfileSection />
-            <MembershipsSection />
-            <BookingsSection />
+            
+            {/* Условный рендеринг секций */}
+            {isTrainer ? (
+              // 👈 Секции для тренера
+              <TrainerBookingsSection />
+            ) : (
+              // 👈 Секции для клиента
+              <>
+                <MembershipsSection />
+                <BookingsSection />
+              </>
+            )}
           </div>
         </div>
       </div>

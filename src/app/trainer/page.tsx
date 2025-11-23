@@ -1,29 +1,31 @@
 "use client";
 
 import ProtectedRoute from '@/components/ProtectedRoute';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
-import { useEffect, useMemo } from 'react'; // 👈 Добавляем useMemo
+import { useEffect, useMemo, useState } from 'react'; // 👈 Добавляем useMemo и useState
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import toast from 'react-hot-toast';
 
 // Интерфейс для записи, получаемой тренером
 interface Booking {
   id: number;
   status: 'pending' | 'confirmed' | 'cancelled';
   note: string | null;
+  trainer_comment: string | null;
   created_at: string;
   // Тренерские записи могут быть либо групповыми (class_id), либо персональными
-  class_id: number | null; 
+  class_id: number | null;
   user: { // Информация о клиенте
     name: string;
     phone: string;
     email: string;
   };
   // Если запись связана с формой (групповое занятие)
-  form: { 
+  form: {
     starts_at: string;
     ends_at: string;
     service: { title: string };
@@ -43,6 +45,9 @@ const getStatusColor = (status: string) => {
 export default function TrainerDashboard() {
   const { user, hasRole } = useAuthStore();
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const [editingComment, setEditingComment] = useState<number | null>(null);
+  const [commentText, setCommentText] = useState("");
 
   // 🚨 Перенаправляем, если пользователь не имеет роли тренера (role_id = 2)
   useEffect(() => {
@@ -52,20 +57,39 @@ export default function TrainerDashboard() {
   const { data: bookings = [], isLoading, refetch } = useQuery<Booking[]>({
     queryKey: ['trainer-bookings'],
     // 🚨 Используем новый API-маршрут
-    queryFn: () => api.get('/trainer/bookings').then((res) => res.data), 
+    queryFn: () => api.get('/trainer/bookings').then((res) => res.data),
     enabled: hasRole(2), // Запускаем запрос, только если это тренер
   });
-  
-  // 🚨 Логика для подтверждения/отмены записи (имитация)
-  const updateBookingStatus = async (bookingId: number, status: 'confirmed' | 'cancelled') => {
-    try {
-        await api.patch(`/trainer/bookings/${bookingId}`, { status }); // Нужно добавить этот маршрут в api.php
-        refetch(); // Обновляем список записей
-        alert(`Запись ${bookingId} ${status === 'confirmed' ? 'подтверждена' : 'отменена'}`);
-    } catch (error) {
-        alert('Ошибка при обновлении статуса');
-    }
-  };
+
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: number; status: string }) =>
+      api.patch(`/trainer/bookings/${id}`, { status }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['trainer-bookings'] });
+      toast.success(
+        `Запись ${variables.id} ${
+          variables.status === 'confirmed' ? 'подтверждена' : 'отменена'
+        }`
+      );
+    },
+    onError: () => {
+      toast.error('Ошибка при обновлении статуса записи.');
+    },
+  });
+
+  const updateCommentMutation = useMutation({
+    mutationFn: ({ id, trainer_comment }: { id: number; trainer_comment: string }) =>
+      api.patch(`/trainer/bookings/${id}/comment`, { trainer_comment }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['trainer-bookings'] });
+      toast.success('Комментарий обновлен');
+      setEditingComment(null);
+      setCommentText('');
+    },
+    onError: () => {
+      toast.error('Ошибка при обновлении комментария.');
+    },
+  });
 
   const pendingBookings = useMemo(() => bookings.filter(b => b.status === 'pending'), [bookings]);
   const confirmedBookings = useMemo(() => bookings.filter(b => b.status !== 'pending'), [bookings]);
@@ -123,16 +147,68 @@ export default function TrainerDashboard() {
                                     </p>
                                 )}
 
+                                <div className="mt-2">
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Комментарий тренера:
+                                    </label>
+                                    {editingComment === b.id ? (
+                                        <div className="space-y-2">
+                                            <textarea
+                                                value={commentText}
+                                                onChange={(e) => setCommentText(e.target.value)}
+                                                className="w-full p-2 border border-gray-300 rounded text-sm"
+                                                rows={3}
+                                                placeholder="Добавьте комментарий..."
+                                            />
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => updateCommentMutation.mutate({ id: b.id, trainer_comment: commentText })}
+                                                    disabled={updateCommentMutation.isPending}
+                                                    className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 disabled:opacity-70"
+                                                >
+                                                    Сохранить
+                                                </button>
+                                                <button
+                                                    onClick={() => {
+                                                        setEditingComment(null);
+                                                        setCommentText('');
+                                                    }}
+                                                    className="px-3 py-1 border border-gray-300 text-gray-600 text-xs rounded hover:bg-gray-50"
+                                                >
+                                                    Отмена
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="flex justify-between items-start">
+                                            <p className="text-sm text-gray-600 italic flex-1">
+                                                {b.trainer_comment || 'Нет комментария'}
+                                            </p>
+                                            <button
+                                                onClick={() => {
+                                                    setEditingComment(b.id);
+                                                    setCommentText(b.trainer_comment || '');
+                                                }}
+                                                className="ml-2 px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+                                            >
+                                                ✏️
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+
                                 <div className="mt-4 flex gap-3">
-                                    <button 
-                                        onClick={() => updateBookingStatus(b.id, 'confirmed')}
-                                        className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700"
+                                    <button
+                                        onClick={() => updateStatusMutation.mutate({ id: b.id, status: 'confirmed' })}
+                                        disabled={updateStatusMutation.isPending}
+                                        className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 disabled:opacity-70"
                                     >
                                         Подтвердить
                                     </button>
-                                    <button 
-                                        onClick={() => updateBookingStatus(b.id, 'cancelled')}
-                                        className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700"
+                                    <button
+                                        onClick={() => updateStatusMutation.mutate({ id: b.id, status: 'cancelled' })}
+                                        disabled={updateStatusMutation.isPending}
+                                        className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700 disabled:opacity-70"
                                     >
                                         Отменить
                                     </button>
