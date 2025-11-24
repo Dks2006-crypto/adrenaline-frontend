@@ -93,22 +93,31 @@ export default function Trainers() {
               >
                 {/* Аватар и имя */}
                 <div className="relative h-64 w-full">
-                  <Image
-                    src={trainer.avatar_url || "/images/default-trainer.jpg"}
-                    alt={`${trainer.name} ${trainer.last_name || ""}`}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-30 flex items-end p-6">
+                  {trainer.avatar_url ? (
+                    <Image
+                      src={trainer.avatar_url}
+                      alt={`${trainer.name} ${trainer.last_name || ""}`}
+                      fill
+                      className="object-cover z-2"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      unoptimized
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                      <span className="text-6xl font-bold text-white">
+                        {trainer.name?.charAt(0).toUpperCase() || "T"}
+                      </span>
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-opacity-30 flex items-end p-6 z-10">
                     <div>
-                      <h3 className="text-3xl font-bold text-white leading-tight">
+                      <h3 className="text-3xl bg-black py-2 px-4 rounded-full font-bold text-white leading-tight">
                         {trainer.name} {trainer.last_name}
                       </h3>
                     </div>
                   </div>
                   {/* Рейтинг */}
-                  <div className="absolute top-4 right-4 bg-indigo-600 text-white text-sm font-semibold px-3 py-1 rounded-full shadow-lg">
+                  <div className="absolute top-4 z-2 right-4 bg-indigo-600 text-white text-sm font-semibold px-3 py-1 rounded-full shadow-lg">
                     ⭐️ {trainer.rating} ({trainer.reviews_count})
                   </div>
                 </div>

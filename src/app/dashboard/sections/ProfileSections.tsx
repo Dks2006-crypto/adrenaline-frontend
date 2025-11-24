@@ -33,7 +33,7 @@ export default function ProfileSection() {
       : "bg-green-100 text-green-800";
 
   const fallbackAvatar = (
-    <div className="w-28 h-28 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-4xl font-bold shadow-lg">
+    <div className="w-28 h-28 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-4xl font-bold shadow-lg">
       {user?.name?.charAt(0).toUpperCase() || "U"}
     </div>
   );
