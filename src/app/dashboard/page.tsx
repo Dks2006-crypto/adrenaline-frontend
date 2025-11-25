@@ -6,12 +6,8 @@ import ProfileSection from "./sections/ProfileSections";
 import TrainerBookingsSection from "./sections/trainer/TrainerBookingSection";
 import MembershipsSection from "./sections/user/MembershipsSection";
 import BookingsSection from "./sections/user/BookingsSection";
-
-
 export default function Dashboard() {
   const { user, logout } = useAuthStore();
-  
-  // Проверяем роль
   const isTrainer = user?.role_id === 2;
 
   return (
@@ -30,12 +26,8 @@ export default function Dashboard() {
               Выйти из аккаунта
             </button>
           </div>
-
-          {/* Все секции */}
           <div className="space-y-16">
             <ProfileSection />
-            
-            {/* Условный рендеринг секций */}
             {isTrainer ? (
               // 👈 Секции для тренера
               <TrainerBookingsSection />

@@ -15,8 +15,6 @@ interface Trainer {
   avatar_url: string | null;
   specialties: string[] | null;
   bio: string | null;
-  rating: number;
-  reviews_count: number;
 }
 
 export default function Trainers() {
@@ -51,7 +49,6 @@ export default function Trainers() {
   const handleBookClick = (trainerId: number) => {
     if (!token) {
       toast.error("Для записи необходимо войти в систему.");
-      // Можно также перенаправить на страницу логина: router.push('/login');
       return;
     }
     if (!trainerId || trainerId <= 0) {
@@ -115,10 +112,6 @@ export default function Trainers() {
                         {trainer.name} {trainer.last_name}
                       </h3>
                     </div>
-                  </div>
-                  {/* Рейтинг */}
-                  <div className="absolute top-4 z-2 right-4 bg-indigo-600 text-white text-sm font-semibold px-3 py-1 rounded-full shadow-lg">
-                    ⭐️ {trainer.rating} ({trainer.reviews_count})
                   </div>
                 </div>
 
