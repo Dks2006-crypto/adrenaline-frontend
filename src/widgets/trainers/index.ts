@@ -1,0 +1,1 @@
+export { TrainersWidget } from './ui/TrainersWidget';

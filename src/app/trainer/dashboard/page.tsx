@@ -1,7 +1,7 @@
 // app/trainer/dashboard/page.tsx
 'use client';
 
-import ProtectedRoute from '@/components/ProtectedRoute';
+import ProtectedRoute from '@/shared/ProtectedRoute';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'; // 👈 Добавлено useMutation и useQueryClient
 import api from '@/lib/api';
 import { useEffect } from 'react';

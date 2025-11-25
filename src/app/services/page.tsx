@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
-import ServiceCard from '@/components/ui/ServiceCard';
+import ServiceCard from '@/shared/ui/ui/ServiceCard';
 import { useRouter } from 'next/navigation';
 
 export default function ServicesPage() {

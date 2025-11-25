@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuthStore } from "@/store/authStore";
-import ProtectedRoute from "@/components/ProtectedRoute";
+import ProtectedRoute from "@/shared/ProtectedRoute";
 import ProfileSection from "./sections/ProfileSections";
 import TrainerBookingsSection from "./sections/trainer/TrainerBookingSection";
 import MembershipsSection from "./sections/user/MembershipsSection";

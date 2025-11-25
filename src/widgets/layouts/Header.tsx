@@ -1,6 +1,6 @@
 // Header.tsx
 import Link from 'next/link';
-import AuthForm from '../AuthForm';
+import AuthForm from './AuthForm';
 
 export default function Header() {
   return (

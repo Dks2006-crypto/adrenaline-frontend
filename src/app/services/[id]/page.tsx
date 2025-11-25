@@ -7,7 +7,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useParams, useRouter } from 'next/navigation';
-import ProtectedRoute from '@/components/ProtectedRoute';
+import ProtectedRoute from '@/shared/ProtectedRoute';
 
 const purchaseSchema = z.object({
   coupon_code: z.string().optional(),

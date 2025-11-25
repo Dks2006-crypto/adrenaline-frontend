@@ -1,9 +1,9 @@
 "use client";
 
-import Features from "@/components/home/Features";
-import Hero from "@/components/home/Hero";
-import Pricing from "@/components/home/Pricing";
-import Trainers from "@/components/home/Trainers";
+import Features from "@/widgets/home/Features";
+import Hero from "@/widgets/home/Hero";
+import Pricing from "@/widgets/home/Pricing";
+import { TrainersWidget } from "@/widgets/trainers";
 
 export default function HomePage() {
 
@@ -12,7 +12,7 @@ export default function HomePage() {
       
       <Hero />
       <Features />
-      <Trainers />
+      <TrainersWidget />
       <Pricing />
 
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import ProtectedRoute from '@/components/ProtectedRoute';
+import ProtectedRoute from '@/shared/ProtectedRoute';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { useEffect, useMemo, useState } from 'react'; // 👈 Добавляем useMemo и useState
