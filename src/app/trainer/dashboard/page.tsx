@@ -77,11 +77,9 @@ export default function TrainerDashboard() {
   if (isLoading) {
     return (
       <ProtectedRoute>
-        <div className="p-8">
-          <h1 className="text-3xl font-bold mb-8">Кабинет тренера</h1>
-          <div className="text-center py-12 text-gray-500">Загрузка записей...</div>
-        </div>
-      </ProtectedRoute>
+        <div></div>
+
+        </ProtectedRoute>
     );
   }
 

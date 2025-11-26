@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { token, user, loadUser } = useAuthStore();
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -27,15 +27,12 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
-        <div className="text-2xl text-gray-600">Загрузка...</div>
-      </div>
+      <div></div>
     );
   }
 
   if (!token || !user) {
-    router.replace('/login');
-    return null;
+    return null
   }
 
   return <>{children}</>;

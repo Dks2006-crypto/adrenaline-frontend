@@ -114,7 +114,7 @@ export default function BookingModal({
             <div className="space-y-6 mb-6">
               {/* Предпочитаемая дата */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <label className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
                   📅 Предпочитаемая дата
                 </label>
                 <input
@@ -128,7 +128,7 @@ export default function BookingModal({
 
               {/* Предпочитаемое время */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <label className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
                   🕐 Предпочитаемое время
                 </label>
                 <input
@@ -141,7 +141,7 @@ export default function BookingModal({
 
               {/* Тип тренировки */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <label className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
                   🏋️‍♂️ Тип тренировки
                 </label>
                 <select
@@ -158,7 +158,7 @@ export default function BookingModal({
 
               {/* Цели */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <label className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
                   🎯 Ваши цели
                 </label>
                 <textarea
@@ -176,7 +176,7 @@ export default function BookingModal({
           <div className="mb-6">
             <label
               htmlFor="note"
-              className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2"
+              className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2"
             >
               💬 Дополнительные пожелания
             </label>
@@ -193,7 +193,7 @@ export default function BookingModal({
           </div>
 
           {/* Предупреждение о подписке */}
-          <div className="p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border-l-4 border-yellow-400 text-yellow-800 rounded-lg mb-6">
+          <div className="p-4 bg-linear-to-r from-yellow-50 to-orange-50 border-l-4 border-yellow-400 text-yellow-800 rounded-lg mb-6">
             <div className="flex items-start gap-3">
               <span className="text-lg">⚠️</span>
               <div>
@@ -226,7 +226,7 @@ export default function BookingModal({
             <button
               type="submit"
               disabled={mutation.isPending}
-              className="flex-1 py-3 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-lg hover:from-indigo-700 hover:to-purple-700 transition disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed"
+              className="flex-1 py-3 px-6 bg-linear-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-lg hover:from-indigo-700 hover:to-purple-700 transition disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed"
             >
               {mutation.isPending
                 ? "Отправка..."

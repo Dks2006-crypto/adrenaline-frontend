@@ -55,14 +55,14 @@ export default function PurchaseModal({ service, onClose, isOpen }: PurchaseModa
       return;
     }
     
-    // В реальном приложении здесь был бы API-запрос к /api/coupons/check
-    // Для демо-целей:
-    if (couponCode === 'ADRENALINE20') {
-      setDiscountPercent(20);
-      setCouponMessage('Скидка 20% применена!');
-    } else {
+    try {
+      const response = await api.post('/coupons/check', { code: couponCode });
+      setDiscountPercent(response.data.discount_percent);
+      setCouponMessage(response.data.message);
+    } catch (error: any) {
       setDiscountPercent(0);
-      setCouponMessage('Неверный или неактивный промокод.');
+      const errorMessage = error.response?.data?.message || 'Неверный или неактивный промокод.';
+      setCouponMessage(errorMessage);
     }
   }, [couponCode]);
 

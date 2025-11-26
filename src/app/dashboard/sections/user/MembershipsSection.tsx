@@ -33,10 +33,7 @@ export default function MembershipsSection() {
 
   if (isLoading) {
     return (
-      <section>
-        <h2 className="text-3xl font-bold mb-6 text-gray-900">Мои абонементы</h2>
-        <div className="text-center py-12 text-gray-700">Загрузка абонементов...</div>
-      </section>
+<div></div>
     );
   }
 
