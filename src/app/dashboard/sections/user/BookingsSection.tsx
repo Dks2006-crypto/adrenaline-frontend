@@ -41,7 +41,7 @@ export default function BookingsSection() {
     return (
       <section>
         <h2 className="text-3xl font-bold mb-8 text-gray-800">Мои записи</h2>
-        <div className="text-center py-12 text-gray-500">Загрузка записей...</div>
+        <div className="text-center py-12 text-gray-500">Загрузка...</div>
       </section>
     );
   }

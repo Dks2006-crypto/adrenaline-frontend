@@ -1,4 +1,3 @@
-// app/trainer/dashboard/page.tsx
 'use client';
 
 import ProtectedRoute from '@/shared/ProtectedRoute';

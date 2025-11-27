@@ -8,7 +8,7 @@ import { TrainersWidget } from "@/widgets/trainers";
 export default function HomePage() {
 
   return (
-    <div className="bg-linear-to-br from-indigo-50 to-blue-100 py-24 min-h-screen">
+    <div className="bg-linear-to-br from-indigo-50 to-blue-100 min-h-screen">
       
       <Hero />
       <Features />

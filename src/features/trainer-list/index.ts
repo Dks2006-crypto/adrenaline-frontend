@@ -1,1 +1,1 @@
-export { TrainerList } from './ui/TrainerList';
+export { default as TrainerList } from './ui/TrainerList';

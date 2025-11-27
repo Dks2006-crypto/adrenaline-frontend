@@ -5,7 +5,7 @@ import api from "@/lib/api";
 import Link from "next/link";
 import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "next/navigation";
-import PurchaseModal from "@/shared/ui/ui/PurchaseModal";
+import PurchaseModal from "@/shared/ui/PurchaseModal";
 
 // 🚨 ОФИЦИАЛЬНОЕ ОПРЕДЕЛЕНИЕ ИНТЕРФЕЙСА SERVICE
 // Используем 'title' вместо 'name'

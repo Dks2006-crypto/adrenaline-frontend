@@ -19,63 +19,78 @@ export default function AuthForm() {
     router.push('/');
   };
 
+  // Пока hydrating — скелеты
   if (!isMounted) {
     return (
       <div className="flex items-center gap-4">
-        <div className="w-20 h-8 bg-gray-200 rounded animate-pulse" />
-        <div className="w-32 h-10 bg-gray-200 rounded animate-pulse" />
+        <div className="w-20 h-8 bg-gray-700/50 rounded animate-pulse" />
+        <div className="w-32 h-10 bg-gray-700/50 rounded animate-pulse" />
       </div>
     );
   }
 
-  // ← ВОТ ЭТО ГЛАВНОЕ ИЗМЕНЕНИЕ
+  /* ===========================
+      НЕ АВТОРИЗОВАН
+  ============================ */
   if (!token) {
     return (
-      <>
-        <Link href="/login" className="text-gray-700 hover:text-blue-600 font-medium">
-          Войти
-        </Link>
-        <Link
-          href="/register"
-          className="bg-blue-600 text-white px-5 py-2 rounded-lg font-medium hover:bg-blue-700 transition"
-        >
-          Регистрация
-        </Link>
-      </>
+      <Link
+        href="/login"
+        className="
+          px-6 py-2 rounded-full 
+          bg-pink-500 hover:bg-pink-600 
+          text-white font-medium transition
+        "
+      >
+        Войти
+      </Link>
     );
   }
 
-  // Токен есть — показываем авторизованное состояние
+  /* ===========================
+      АВТОРИЗОВАН
+  ============================ */
   return (
-    <>
-      <Link href="/dashboard" className="text-gray-700 hover:text-blue-600 font-medium">
+    <div className="flex items-center gap-6 text-sm">
+
+      <Link href="/dashboard" className="hover:text-pink-400 transition">
         Личный кабинет
       </Link>
 
+      {/* Тренер */}
       {user?.role_id === 2 && (
-        <Link href="/trainer" className="text-gray-700 hover:text-blue-600 font-medium">
-          Тренер
+        <Link href="/trainer" className="hover:text-pink-400 transition">
+          Тренер панель
         </Link>
       )}
 
+      {/* Админ */}
       {user?.role_id === 1 && (
         <a
           href="http://127.0.0.1:8000/admin"
           target="_blank"
           rel="noopener noreferrer"
-          className="bg-purple-600 text-white px-5 py-2 rounded-lg font-medium hover:bg-purple-700 transition shadow-sm"
+          className="
+            bg-purple-600 hover:bg-purple-700
+            text-white px-4 py-2 rounded-lg transition
+          "
         >
-          Админ-панель
+          Админ
         </a>
       )}
 
-      <span className="text-gray-600 text-sm">
-        Привет, {user?.name || "друг"}!
+      {/* Имя */}
+      <span className="text-gray-300 text-sm">
+        {user?.name || 'гость'}
       </span>
 
-      <button onClick={handleLogout} className="text-red-600 hover:text-red-700 font-medium">
+      {/* Logout */}
+      <button
+        onClick={handleLogout}
+        className="text-red-400 hover:text-red-500 font-medium transition"
+      >
         Выйти
       </button>
-    </>
+    </div>
   );
 }

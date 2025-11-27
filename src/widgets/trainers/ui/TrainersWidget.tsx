@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { TrainerList } from '@/features/trainer-list';
-import BookingModal from '@/shared/ui/ui/BookingModal';
+import BookingModal from '@/shared/ui/BookingModal';
 import { useAuthStore } from '@/store/authStore';
 import toast from 'react-hot-toast';
 

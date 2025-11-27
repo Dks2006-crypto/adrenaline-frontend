@@ -1,18 +1,40 @@
-// Header.tsx
-import Link from 'next/link';
-import AuthForm from './AuthForm';
+import Link from "next/link";
+import AuthForm from "./AuthForm";
 
 export default function Header() {
   return (
-    <header className="bg-white shadow-sm border-b sticky top-0 z-50">
-      <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-        <Link href="/" className="text-2xl font-bold text-blue-600 hover:text-blue-700">
-          Adrenaline
+    <header className="bg-[#1d1d1d] text-white sticky top-0 z-50">
+      <div className="max-w-[1400px] mx-auto px-6 h-16 flex items-center justify-between">
+        {/* Лого */}
+        <Link href="/" className="flex flex-col items-center">
+          <span className="text-xl font-bold tracking-wide mt-1.5">ADRENALINE</span>
+          <span className="text-[10px] font-light ">FITNESS</span>
         </Link>
 
-        <nav className="flex items-center gap-6">
-          <AuthForm />
+        {/* Навигация */}
+        <nav className="hidden md:flex items-center gap-8 text-sm">
+          <Link href="/trainer" className="hover:text-pink-400 transition">
+            Тренеры
+          </Link>
+          <Link href="/services" className="hover:text-pink-400 transition">
+            Услуги
+          </Link>
+          <Link href="/pricing" className="hover:text-pink-400 transition">
+            Тарифы
+          </Link>
+          <Link href="/gallery" className="hover:text-pink-400 transition">
+            Галерея
+          </Link>
+          <Link href="/faq" className="hover:text-pink-400 transition">
+            Часто задаваемые вопросы
+          </Link>
+          <Link href="/contacts" className="hover:text-pink-400 transition">
+            Контакты
+          </Link>
         </nav>
+
+        {/* AuthForm с ролью */}
+        <AuthForm />
       </div>
     </header>
   );
