@@ -1,3 +1,5 @@
+import Image from "next/image";
+import { useState } from "react";
 import { Trainer } from "@/entities/trainer";
 
 interface TrainerCardProps {
@@ -6,13 +8,22 @@ interface TrainerCardProps {
 }
 
 export default function TrainerCard({ trainer, onBook }: TrainerCardProps) {
+  const [imageSrc, setImageSrc] = useState(trainer.avatar_url || "/default-trainer.jpg");
+
+  const handleImageError = () => {
+    setImageSrc("/default-trainer.jpg");
+  };
+
   return (
     <div className="bg-white rounded-3xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300">
       <div className="relative w-full h-64">
-        <img
-          src={trainer.avatar_url || "https://via.placeholder.com/400x400?text=No+Image"}
+        <Image
+          src={imageSrc}
           alt={`${trainer.name} ${trainer.last_name || ""}`}
-          className="w-full h-full object-cover"
+          fill
+          className="object-cover"
+          unoptimized
+          onError={handleImageError}
         />
       </div>
 
@@ -35,4 +46,3 @@ export default function TrainerCard({ trainer, onBook }: TrainerCardProps) {
     </div>
   );
 }
-
