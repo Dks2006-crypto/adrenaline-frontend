@@ -5,6 +5,7 @@ import Hero from "@/widgets/home/Hero";
 import Pricing from "@/widgets/home/Pricing";
 import GroupClasses from "@/widgets/home/GroupClasses";
 import { TrainersWidget } from "@/widgets/trainers";
+import GallerySection from "@/widgets/home/GallerySection";
 
 export default function HomePage() {
 
@@ -15,6 +16,7 @@ export default function HomePage() {
       <Pricing />
       <GroupClasses />
       <TrainersWidget />
+      <GallerySection />
       <Features />
 
     </div>

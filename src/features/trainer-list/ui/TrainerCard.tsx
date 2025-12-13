@@ -1,6 +1,14 @@
 import Image from "next/image";
 import { useState } from "react";
-import { Trainer } from "@/entities/trainer";
+
+interface Trainer {
+  id: number;
+  name: string;
+  last_name?: string | null;
+  avatar_url?: string | null;
+  bio?: string | null;
+  specialties?: string[] | null; // Теперь массив строк
+}
 
 interface TrainerCardProps {
   trainer: Trainer;
@@ -11,7 +19,12 @@ export default function TrainerCard({ trainer, onBook }: TrainerCardProps) {
   const [imageError, setImageError] = useState(false);
   const hasImage = trainer.avatar_url && !imageError;
 
-  /* V-декорация — показываем только если нет фото */
+  // Формируем строку специализаций
+  const specialtiesText = trainer.specialties && trainer.specialties.length > 0
+    ? trainer.specialties.join(" • ")
+    : null;
+
+  /* V-декорация — только если нет фото */
   const VDecor = () => (
     <div className="flex justify-center items-center w-full h-full relative">
       {/* Белая перевёрнутая V сзади */}
@@ -38,7 +51,7 @@ export default function TrainerCard({ trainer, onBook }: TrainerCardProps) {
       transition-all duration-300
       group
     ">
-      {/* Блок с фото или V-декорацией */}
+      {/* Фото или V-декорация */}
       <div className="relative w-full h-80 bg-black/40">
         {hasImage ? (
           <>
@@ -53,10 +66,8 @@ export default function TrainerCard({ trainer, onBook }: TrainerCardProps) {
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
           </>
         ) : (
-          /* Если нет фото — показываем V-декорацию */
           <div className="flex items-center justify-center h-full">
             <VDecor />
-            {/* Опционально: иконка или инициалы */}
             <div className="absolute text-6xl font-bold text-white/30 tracking-wider">
               {trainer.name.charAt(0)}{trainer.last_name?.charAt(0) || ""}
             </div>
@@ -64,23 +75,25 @@ export default function TrainerCard({ trainer, onBook }: TrainerCardProps) {
         )}
       </div>
 
-      {/* Информация */}
+      {/* Информация о тренере */}
       <div className="p-8 flex flex-col flex-1">
         <h3 className="text-2xl font-bold text-white text-center mb-4">
           {trainer.name} {trainer.last_name || ""}
         </h3>
 
-        {trainer.specialties && (
-          <p className="text-[#1E79AD] text-sm font-medium text-center mb-3">
-            {trainer.specialties}
+        {/* Специализации — через разделитель • */}
+        {specialtiesText && (
+          <p className="text-[#1E79AD] text-sm font-medium text-center mb-4 leading-relaxed">
+            {specialtiesText}
           </p>
         )}
 
+        {/* Биография */}
         <p className="text-white/80 text-sm leading-relaxed flex-1 text-center">
-          {trainer.bio || "Профессиональный тренер с большим опытом. Готов помочь достичь ваших целей."}
+          {trainer.bio || "Профессиональный тренер. Поможет достичь ваших фитнес-целей с индивидуальным подходом."}
         </p>
 
-        {/* Кнопка */}
+        {/* Кнопка записи */}
         <button
           onClick={() => onBook(trainer.id)}
           className="mt-8 bg-[#1E79AD] hover:bg-[#145073] text-white font-semibold py-3.5 rounded-xl transition shadow-lg"
