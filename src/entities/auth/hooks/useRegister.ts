@@ -15,6 +15,7 @@ export const useRegister = () => {
     defaultValues: {
       name: "",
       email: "",
+      phone: "",
       password: "",
       password_confirmation: "",
     },
@@ -25,6 +26,7 @@ export const useRegister = () => {
       await registerUser({
         name: data.name,
         email: data.email,
+        phone: data.phone,
         password: data.password,
         password_confirmation: data.password_confirmation,
       });

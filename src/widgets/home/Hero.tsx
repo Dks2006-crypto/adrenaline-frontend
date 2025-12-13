@@ -110,7 +110,7 @@ export default function Hero() {
           {/* Кнопка */}
           {!token ? (
             <Link
-              href="/register"
+              href="/login"
               className="
                 w-full block
                 bg-[#404096]

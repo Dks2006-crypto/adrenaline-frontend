@@ -12,6 +12,10 @@ export const registerSchema = z.object({
     .min(2, "Имя от 2 символов")
     .regex(/^[\p{L}\s]+$/u, "Только буквы"),
   email: z.string().min(1, "Введите email").email("Некорректный email"),
+  phone: z
+    .string()
+    .regex(/^[\d\s+()]+$/, "Некорректный формат телефона")
+    .min(10, "Введите полный номер"),
   password: z
     .string()
     .min(6, "Пароль от 6 символов")

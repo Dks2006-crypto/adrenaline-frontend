@@ -1,75 +1,179 @@
-'use client';
+"use client";
 
 import { useRegister } from "../hooks/useRegister";
 import Link from "next/link";
 
-export default function RegisterForm() {
+export function RegisterForm() {
   const { form, onSubmit, isLoading } = useRegister();
   const { register, formState: { errors } } = form;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-100 px-4">
+    <div className="relative w-full max-w-md">
+      {/* Неоновая тень сверху и снизу */}
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#1E79AD] to-transparent opacity-70" />
+      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#1E79AD] to-transparent opacity-70" />
+
       <form
         onSubmit={onSubmit}
-        className="w-full max-w-md bg-white/90 backdrop-blur shadow-xl rounded-2xl p-8 animate-fadeIn"
+        className="
+          relative
+          bg-[#121212]/95
+          backdrop-blur-xl
+          rounded-3xl
+          p-8
+          border
+          border-[#1E79AD]/30
+          shadow-2xl
+          shadow-[#1E79AD]/20
+        "
       >
-        <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">
+        <h1 className="text-3xl font-bold text-white text-center mb-10">
           Регистрация
         </h1>
 
-        <div className="mb-4">
+        {/* Имя */}
+        <div className="mb-6">
           <input
             {...register("name")}
             type="text"
-            placeholder="Ваше имя"
-            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-400 outline-none transition text-black"
+            placeholder="Имя"
+            className="
+              w-full
+              px-5 py-4
+              bg-[#1a1a1a]
+              border border-white/10
+              rounded-2xl
+              text-white
+              placeholder-white/40
+              focus:border-[#1E79AD]
+              focus:outline-none
+              focus:ring-2 focus:ring-[#1E79AD]/30
+              transition
+            "
           />
-          {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
+          {errors.name && <p className="text-red-400 text-sm mt-2">{errors.name.message}</p>}
         </div>
 
-        <div className="mb-4">
+        {/* Email */}
+        <div className="mb-6">
           <input
             {...register("email")}
             type="email"
             placeholder="Email"
-            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-400 outline-none transition text-black"
+            className="
+              w-full
+              px-5 py-4
+              bg-[#1a1a1a]
+              border border-white/10
+              rounded-2xl
+              text-white
+              placeholder-white/40
+              focus:border-[#1E79AD]
+              focus:outline-none
+              focus:ring-2 focus:ring-[#1E79AD]/30
+              transition
+            "
           />
-          {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
+          {errors.email && <p className="text-red-400 text-sm mt-2">{errors.email.message}</p>}
         </div>
 
-        <div className="mb-4">
+        {/* Телефон */}
+        <div className="mb-6">
+          <input
+            {...register("phone")}
+            type="tel"
+            placeholder="Телефон"
+            className="
+              w-full
+              px-5 py-4
+              bg-[#1a1a1a]
+              border border-white/10
+              rounded-2xl
+              text-white
+              placeholder-white/40
+              focus:border-[#1E79AD]
+              focus:outline-none
+              focus:ring-2 focus:ring-[#1E79AD]/30
+              transition
+            "
+          />
+          {errors.phone && <p className="text-red-400 text-sm mt-2">{errors.phone.message}</p>}
+        </div>
+
+        {/* Пароль */}
+        <div className="mb-6">
           <input
             {...register("password")}
             type="password"
             placeholder="Пароль"
-            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-400 outline-none transition text-black"
+            className="
+              w-full
+              px-5 py-4
+              bg-[#1a1a1a]
+              border border-white/10
+              rounded-2xl
+              text-white
+              placeholder-white/40
+              focus:border-[#1E79AD]
+              focus:outline-none
+              focus:ring-2 focus:ring-[#1E79AD]/30
+              transition
+            "
           />
-          {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
+          {errors.password && <p className="text-red-400 text-sm mt-2">{errors.password.message}</p>}
         </div>
 
-        <div className="mb-6">
+        {/* Подтверждение пароля */}
+        <div className="mb-8">
           <input
             {...register("password_confirmation")}
             type="password"
-            placeholder="Повторите пароль"
-            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-purple-400 outline-none transition text-black"
+            placeholder="Подтверждение пароля"
+            className="
+              w-full
+              px-5 py-4
+              bg-[#1a1a1a]
+              border border-white/10
+              rounded-2xl
+              text-white
+              placeholder-white/40
+              focus:border-[#1E79AD]
+              focus:outline-none
+              focus:ring-2 focus:ring-[#1E79AD]/30
+              transition
+            "
           />
           {errors.password_confirmation && (
-            <p className="text-red-500 text-sm mt-1">{errors.password_confirmation.message}</p>
+            <p className="text-red-400 text-sm mt-2">{errors.password_confirmation.message}</p>
           )}
         </div>
 
+        {/* Кнопка */}
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-purple-600 text-white p-3 rounded-lg font-medium text-lg shadow-md hover:bg-purple-700 disabled:opacity-70 transition"
+          className="
+            w-full
+            py-4
+            bg-[#1E79AD]
+            hover:bg-[#14506d]
+            text-white
+            font-bold
+            rounded-2xl
+            shadow-lg
+            shadow-[#1E79AD]/40
+            transition
+            disabled:opacity-70
+            disabled:cursor-not-allowed
+          "
         >
-          {isLoading ? "Создаём аккаунт..." : "Зарегистрироваться"}
+          {isLoading ? "Регистрация..." : "Зарегистрироваться"}
         </button>
 
-        <p className="mt-4 text-center text-gray-600">
-          Уже есть аккаунт?{' '}
-          <Link href="/login" className="text-purple-600 hover:text-purple-800 font-medium">
+        {/* Ссылка на вход */}
+        <p className="mt-6 text-center text-white/70 text-sm">
+          Уже есть аккаунт?{" "}
+          <Link href="/login" className="text-[#1E79AD] hover:text-[#1E79AD]/80 font-medium transition">
             Войти
           </Link>
         </p>

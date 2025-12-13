@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/api";
 import toast from "react-hot-toast";
@@ -20,231 +20,169 @@ export default function BookingModal({
   trainerId,
   classId,
 }: BookingModalProps) {
-  // --- 1. ВСЕ ХУКИ (ОБЯЗАТЕЛЬНО БЕЗ УСЛОВИЙ) ---
-  const [note, setNote] = useState("");
   const [preferredDate, setPreferredDate] = useState("");
   const [preferredTime, setPreferredTime] = useState("");
-  const [trainingType, setTrainingType] = useState("");
-  const [goals, setGoals] = useState("");
+  const [note, setNote] = useState("");
   const queryClient = useQueryClient();
 
-  // Определяем тип записи и payload UNCONDITIONALLY
   const isPersonalBooking = trainerId !== null && classId === null;
   const isGroupBooking = classId !== null && trainerId === null;
 
+  // Формируем заметку
   const combinedNote = useMemo(() => {
-    let noteText = note.trim();
-    if (preferredDate || preferredTime || trainingType || goals) {
-      const details = [];
-      if (preferredDate) details.push(`Предпочитаемая дата: ${preferredDate}`);
-      if (preferredTime) details.push(`Предпочитаемое время: ${preferredTime}`);
-      if (trainingType) details.push(`Тип тренировки: ${trainingType}`);
-      if (goals) details.push(`Цели: ${goals}`);
-      noteText += (noteText ? "\n\n" : "") + details.join("\n");
-    }
-    return noteText;
-  }, [note, preferredDate, preferredTime, trainingType, goals]);
+    const parts = [];
+    if (preferredDate) parts.push(`Дата: ${new Date(preferredDate).toLocaleDateString("ru-RU")}`);
+    if (preferredTime) parts.push(`Время: ${preferredTime}`);
+    if (note.trim()) parts.push(`Комментарий: ${note.trim()}`);
+    return parts.length > 0 ? parts.join("\n") : "";
+  }, [preferredDate, preferredTime, note]);
 
   const payload = useMemo(() => ({
-    ...(isGroupBooking ? { form_id: classId } : {}),
+    ...(isGroupBooking ? { class_id: classId } : {}),
     ...(isPersonalBooking ? { trainer_id: trainerId } : {}),
     ...(combinedNote ? { note: combinedNote } : {}),
   }), [isGroupBooking, classId, isPersonalBooking, trainerId, combinedNote]);
 
   const mutation = useMutation({
-    mutationFn: (data: typeof payload) => {
-      console.log("Отправка бронирования:", data);
-      return api.post("/bookings", data);
-    },
-    onSuccess: (res) => {
-      console.log("Успешное бронирование:", res.data);
-      toast.success(res.data.message || "Запись подтверждена/отправлена.");
+    mutationFn: (data: typeof payload) => api.post("/bookings", data),
+    onSuccess: () => {
+      toast.success(isPersonalBooking ? "Запрос отправлен тренеру!" : "Вы успешно записаны!");
       queryClient.invalidateQueries({ queryKey: ["bookings"] });
       onClose();
       onSuccess();
     },
     onError: (error: any) => {
-      console.error("Ошибка бронирования:", error.response?.data || error.message);
-      toast.error(error.response?.data?.error || "Ошибка при записи. Проверьте вашу подписку.");
+      toast.error(error.response?.data?.error || "Ошибка записи. Проверьте подписку.");
     },
   });
 
-  const handleSubmit = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-      // Убедимся, что выбран валидный тип бронирования
-      if (!isPersonalBooking && !isGroupBooking) {
-        toast.error("Необходимо выбрать занятие или тренера.");
-        return;
-      }
-      mutation.mutate(payload);
-    },
-    [mutation, payload, isPersonalBooking, isGroupBooking]
-  );
+  const handleSubmit = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    if (isPersonalBooking && !preferredDate) {
+      toast.error("Выберите желаемую дату");
+      return;
+    }
+    mutation.mutate(payload);
+  }, [mutation, payload, isPersonalBooking]);
 
-  // --- 2. УСЛОВНЫЙ ВОЗВРАТ (ПОСЛЕ ВСЕХ ХУКОВ) ---
+  // Блокировка скролла фона
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
-  // --- 3. ОСТАЛЬНАЯ ЛОГИКА / JSX ---
-  const title = isPersonalBooking
-    ? "🎯 Запрос на персональную тренировку"
-    : isGroupBooking
-    ? "📅 Запись на групповое занятие"
-    : "Ошибка: Неверный тип записи";
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div
+      className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-[#121212] border border-white/10 rounded-2xl w-full max-w-lg shadow-2xl flex flex-col"
+        style={{ maxHeight: "92vh" }}
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Заголовок */}
-        <div className="flex justify-between items-center p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-            {title}
+        <div className="p-6 pb-4 text-center border-b border-white/10">
+          <h2 className="text-2xl font-bold text-white">
+            {isPersonalBooking ? "Персональная тренировка" : "Запись на занятие"}
           </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition text-2xl"
-          >
-            ×
-          </button>
         </div>
 
-        {/* Форма */}
-        <form className="p-6" onSubmit={handleSubmit}>
-          {isPersonalBooking && (
-            <div className="space-y-6 mb-6">
-              {/* Предпочитаемая дата */}
-              <div>
-                <label className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                  📅 Предпочитаемая дата
-                </label>
-                <input
-                  type="date"
-                  value={preferredDate}
-                  onChange={(e) => setPreferredDate(e.target.value)}
-                  min={new Date().toISOString().split('T')[0]}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                />
-              </div>
+        {/* Скроллируемый контент */}
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {isPersonalBooking && (
+              <>
+                {/* Дата */}
+                <div>
+                  <label className="block text-white/80 text-sm font-medium mb-2">
+                    Желаемая дата <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    value={preferredDate}
+                    onChange={(e) => setPreferredDate(e.target.value)}
+                    min={new Date().toISOString().split("T")[0]}
+                    required
+                    className="w-full px-4 py-3 bg-[#0b0b0b] border border-white/10 rounded-xl text-white focus:border-[#1E79AD] focus:ring-2 focus:ring-[#1E79AD]/50 transition"
+                  />
+                </div>
 
-              {/* Предпочитаемое время */}
-              <div>
-                <label className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                  🕐 Предпочитаемое время
-                </label>
-                <input
-                  type="time"
-                  value={preferredTime}
-                  onChange={(e) => setPreferredTime(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                />
-              </div>
+                {/* Время */}
+                <div>
+                  <label className="block text-white/80 text-sm font-medium mb-2">
+                    Желаемое время
+                  </label>
+                  <input
+                    type="time"
+                    value={preferredTime}
+                    onChange={(e) => setPreferredTime(e.target.value)}
+                    className="w-full px-4 py-3 bg-[#0b0b0b] border border-white/10 rounded-xl text-white focus:border-[#1E79AD] focus:ring-2 focus:ring-[#1E79AD]/50 transition"
+                  />
+                </div>
+              </>
+            )}
 
-              {/* Тип тренировки */}
-              <div>
-                <label className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                  🏋️‍♂️ Тип тренировки
-                </label>
-                <select
-                  value={trainingType}
-                  onChange={(e) => setTrainingType(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
-                >
-                  <option value="">Выберите тип</option>
-                  <option value="Онлайн">Онлайн</option>
-                  <option value="В зале">В зале</option>
-                  <option value="На улице">На улице</option>
-                </select>
-              </div>
-
-              {/* Цели */}
-              <div>
-                <label className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-                  🎯 Ваши цели
-                </label>
-                <textarea
-                  value={goals}
-                  onChange={(e) => setGoals(e.target.value)}
-                  rows={3}
-                  placeholder="Например: набор массы, похудение, улучшение выносливости..."
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition resize-none"
-                />
-              </div>
+            {/* Комментарий */}
+            <div>
+              <label className="block text-white/80 text-sm font-medium mb-2">
+                Дополнительно
+              </label>
+              <textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                rows={4}
+                placeholder="Опыт тренировок, цели, пожелания..."
+                className="w-full px-4 py-3 bg-[#0b0b0b] border border-white/10 rounded-xl text-white focus:border-[#1E79AD] focus:ring-2 focus:ring-[#1E79AD]/50 transition resize-none"
+              />
             </div>
-          )}
 
-          {/* Дополнительные пожелания */}
-          <div className="mb-6">
-            <label
-              htmlFor="note"
-              className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2"
-            >
-              💬 Дополнительные пожелания
-            </label>
-            <textarea
-              id="note"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              rows={4}
-              placeholder={isPersonalBooking
-                ? "Расскажите о вашем опыте, предпочтениях или любых особых требованиях..."
-                : "Если это групповое занятие, можете оставить краткий комментарий для тренера."}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition resize-none"
-            />
-          </div>
-
-          {/* Предупреждение о подписке */}
-          <div className="p-4 bg-linear-to-r from-yellow-50 to-orange-50 border-l-4 border-yellow-400 text-yellow-800 rounded-lg mb-6">
-            <div className="flex items-start gap-3">
-              <span className="text-lg">⚠️</span>
-              <div>
-                <p className="text-sm font-medium">
-                  Для записи необходима <span className="font-bold">активная подписка</span> или <span className="font-bold">достаточное количество посещений</span>.
-                </p>
-                {isPersonalBooking && (
-                  <p className="text-xs mt-2 text-yellow-700">
-                    Ваш запрос будет отправлен тренеру для подтверждения. Он свяжется с вами в ближайшее время.
-                  </p>
-                )}
-                {isGroupBooking && (
-                  <p className="text-xs mt-2 text-yellow-700">
-                    Запись будет подтверждена автоматически при наличии свободных мест.
-                  </p>
-                )}
-              </div>
+            {/* Инфо-блок */}
+            <div className="p-4 bg-[#1E79AD]/10 border border-[#1E79AD]/30 rounded-xl text-[#1E79AD] text-sm">
+              <p className="font-medium">Требуется активная подписка</p>
+              <p className="mt-1 text-xs opacity-90">
+                {isPersonalBooking
+                  ? "Тренер свяжется с вами для подтверждения"
+                  : "Запись подтверждена при наличии мест"}
+              </p>
             </div>
-          </div>
 
-          {/* Кнопки */}
+            {/* Ошибка */}
+            {mutation.isError && (
+              <div className="p-4 bg-red-900/50 border border-red-500 rounded-xl text-red-300 text-sm text-center">
+                {(mutation.error as any).response?.data?.error || "Ошибка записи"}
+              </div>
+            )}
+          </form>
+        </div>
+
+        {/* Фиксированные кнопки внизу */}
+        <div className="p-6 pt-4 border-t border-white/10">
           <div className="flex gap-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 px-6 border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium"
+              className="flex-1 py-3.5 bg-[#0b0b0b] border border-white/10 text-white/80 rounded-xl hover:bg-white/5 transition font-medium"
             >
               Отмена
             </button>
             <button
-              type="submit"
-              disabled={mutation.isPending}
-              className="flex-1 py-3 px-6 bg-linear-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-lg hover:from-indigo-700 hover:to-purple-700 transition disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed"
+              onClick={handleSubmit}
+              disabled={mutation.isPending || (isPersonalBooking && !preferredDate)}
+              className="flex-1 py-3.5 bg-[#1E79AD] text-white font-bold rounded-xl hover:bg-[#145073] disabled:bg-gray-700 disabled:cursor-not-allowed transition"
             >
-              {mutation.isPending
-                ? "Отправка..."
-                : isPersonalBooking
-                ? "📤 Отправить запрос"
-                : "✅ Записаться"}
+              {mutation.isPending ? "Отправка..." : isPersonalBooking ? "Отправить запрос" : "Записаться"}
             </button>
           </div>
-
-          {/* Сообщение об ошибке */}
-          {mutation.isError && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-600 text-sm text-center">
-                Произошла ошибка: {(mutation.error as any).response?.data?.error || mutation.error.message}
-              </p>
-            </div>
-          )}
-        </form>
+        </div>
       </div>
     </div>
   );

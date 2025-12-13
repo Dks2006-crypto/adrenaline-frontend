@@ -1,58 +1,104 @@
-'use client';
+"use client";
 
 import { useLogin } from "../hooks/useLogin";
 import Link from "next/link";
 
-export default function LoginForm() {
+export function LoginForm() {
   const { form, onSubmit, isLoading } = useLogin();
   const { register, formState: { errors } } = form;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-blue-100 px-4">
+    <div className="relative w-full max-w-md">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#1E79AD] to-transparent opacity-70" />
+      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#1E79AD] to-transparent opacity-70" />
+
       <form
         onSubmit={onSubmit}
-        className="w-full max-w-md bg-white/90 backdrop-blur shadow-xl rounded-2xl p-8 animate-fadeIn"
+        className="
+          relative
+          bg-[#121212]/95
+          backdrop-blur-xl
+          rounded-3xl
+          p-8
+          border
+          border-[#1E79AD]/30
+          shadow-2xl
+          shadow-[#1E79AD]/20
+        "
       >
-        <h1 className="text-3xl font-bold text-center mb-6 text-gray-800">
+        <h1 className="text-3xl font-bold text-white text-center mb-10">
           Вход
         </h1>
 
-        <div className="mb-4">
+        <div className="mb-6">
           <input
             {...register("email")}
             type="email"
             placeholder="Email"
-            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none transition text-black"
+            className="
+              w-full
+              px-5 py-4
+              bg-[#1a1a1a]
+              border border-white/10
+              rounded-2xl
+              text-white
+              placeholder-white/40
+              focus:border-[#1E79AD]
+              focus:outline-none
+              focus:ring-2 focus:ring-[#1E79AD]/30
+              transition
+            "
           />
-          {errors.email && (
-            <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
-          )}
+          {errors.email && <p className="text-red-400 text-sm mt-2">{errors.email.message}</p>}
         </div>
 
-        <div className="mb-6">
+        <div className="mb-8">
           <input
             {...register("password")}
             type="password"
             placeholder="Пароль"
-            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400 outline-none transition text-black"
+            className="
+              w-full
+              px-5 py-4
+              bg-[#1a1a1a]
+              border border-white/10
+              rounded-2xl
+              text-white
+              placeholder-white/40
+              focus:border-[#1E79AD]
+              focus:outline-none
+              focus:ring-2 focus:ring-[#1E79AD]/30
+              transition
+            "
           />
-          {errors.password && (
-            <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
-          )}
+          {errors.password && <p className="text-red-400 text-sm mt-2">{errors.password.message}</p>}
         </div>
 
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-indigo-600 text-white p-3 rounded-lg font-medium text-lg shadow-md hover:bg-indigo-700 disabled:opacity-70 transition"
+          className="
+            w-full
+            py-4
+            bg-[#1E79AD]
+            hover:bg-[#145073]
+            text-white
+            font-bold
+            rounded-2xl
+            shadow-lg
+            shadow-[#1E79AD]/40
+            transition
+            disabled:opacity-70
+            disabled:cursor-not-allowed
+          "
         >
-          {isLoading ? "Входим..." : "Войти"}
+          {isLoading ? "Вход..." : "Войти"}
         </button>
 
-        <p className="mt-4 text-center text-gray-600">
-          Нет аккаунта?{' '}
-          <Link href="/register" className="text-indigo-600 hover:text-indigo-800 font-medium">
-            Регистрация
+        <p className="mt-6 text-center text-white/70 text-sm">
+          Нет аккаунта?{" "}
+          <Link href="/register" className="text-[#1E79AD] hover:text-[#1E79AD]/80 font-medium transition">
+            Зарегистрироваться
           </Link>
         </p>
       </form>
