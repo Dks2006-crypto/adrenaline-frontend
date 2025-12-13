@@ -224,7 +224,7 @@ export default function ProfileSection() {
 
 function InfoRow({ label, value }: { label: string; value?: string }) {
   return (
-    <div className="flex border-b border-white/10 pb-2">
+    <div className="flex border-b border-[#1E79AD] pb-2">
       <span className="w-40 text-white/60">{label}:</span>
       <span>{value || "—"}</span>
     </div>
