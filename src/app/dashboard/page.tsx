@@ -12,7 +12,7 @@ export default function Dashboard() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-linear-to-br from-blue-50 via-indigo-50 to-purple-50">
+      <div className="min-h-screen bg-[#262626] from-blue-50 via-indigo-50 to-purple-50">
         <div className="max-w-7xl mx-auto p-6 md:p-8 lg:p-12">
           {/* Шапка */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-12 gap-6">

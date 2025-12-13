@@ -5,45 +5,28 @@ import Image from "next/image";
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 import api from "@/lib/api";
+import { AxiosError } from "axios";
 import Cropper from "react-easy-crop";
 import { getCroppedImg } from "@/lib/cropImage";
+import EditProfileModal from "@/shared/ui/EditProfileModal";
 
 export default function ProfileSection() {
-  const { user, loadUser } = useAuthStore();
+  const { user, loadUser, logout } = useAuthStore();
+
+  const isTrainer = user?.role_id === 2;
+  const meta = user?.metadata || {};
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<{ width: number; height: number; x: number; y: number } | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const roleText =
-    user?.role_id === 1
-      ? "Администратор"
-      : user?.role_id === 2
-      ? "Тренер"
-      : "Клиент";
+  const handleAvatarClick = () => fileInputRef.current?.click();
 
-  const roleColor =
-    user?.role_id === 1
-      ? "bg-red-100 text-red-800"
-      : user?.role_id === 2
-      ? "bg-amber-100 text-amber-800"
-      : "bg-green-100 text-green-800";
-
-  const fallbackAvatar = (
-    <div className="w-28 h-28 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-4xl font-bold shadow-lg">
-      {user?.name?.charAt(0).toUpperCase() || "U"}
-    </div>
-  );
-
-  // Открываем выбор файла
-  const handleAvatarClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  // Когда выбрали файл
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -61,91 +44,120 @@ export default function ProfileSection() {
     reader.readAsDataURL(file);
   };
 
-  // Когда обрезали
-  const onCropComplete = (croppedArea: any, croppedAreaPixels: any) => {
-    setCroppedAreaPixels(croppedAreaPixels);
-  };
+  const [editOpen, setEditOpen] = useState(false);
 
-  // Загрузка обрезанного изображения
+  const onCropComplete = (_: unknown, cropped: { width: number; height: number; x: number; y: number }) =>
+    setCroppedAreaPixels(cropped);
+
   const uploadCroppedImage = async () => {
     if (!imageSrc || !croppedAreaPixels) return;
 
     setIsUploading(true);
     try {
       const croppedFile = await getCroppedImg(imageSrc, croppedAreaPixels);
-
       const formData = new FormData();
       formData.append("avatar", croppedFile);
 
-      await api.post("/me/avatar", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
+      await api.post("/me/avatar", formData);
       toast.success("Аватар обновлён!");
       await loadUser();
       setIsModalOpen(false);
-    } catch (err: any) {
-      console.error(err);
-      toast.error(
-        "Ошибка загрузки: " + (err.response?.data?.error || err.message)
-      );
+    } catch (error: unknown) {
+      console.error('Avatar upload error:', error);
+      
+      if (error instanceof AxiosError && error.response) {
+        if (error.response.status === 422) {
+          const errors = error.response.data.errors;
+          if (errors?.avatar) {
+            toast.error(`Ошибка валидации: ${errors.avatar[0]}`);
+          } else {
+            toast.error("Ошибка валидации файла");
+          }
+        } else if (error.response.status === 401) {
+          toast.error("Необходимо авторизоваться");
+        } else if (error.response.status === 413) {
+          toast.error("Файл слишком большой");
+        } else {
+          toast.error(`Ошибка загрузки: ${error.response.data?.message || error.message || 'Неизвестная ошибка'}`);
+        }
+      } else {
+        toast.error("Ошибка загрузки");
+      }
     } finally {
       setIsUploading(false);
     }
   };
 
+  if (!user) return null;
+
   return (
     <>
-      <section>
-        <h2 className="text-3xl font-bold mb-8 text-gray-800">Мой профиль</h2>
+      <section className="flex justify-center py-20">
+        <div className="w-full max-w-4xl border-2 border-[#1E79AD] rounded-2xl p-8 text-white relative bg-black/70 backdrop-blur">
+          <h2 className="text-center text-xl mb-10 opacity-90">Мой профиль</h2>
 
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 max-w-2xl">
-          <div className="flex items-center gap-8">
-            {/* Аватар с кликабельностью */}
-            <div className="shrink-0 relative group">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_220px] gap-10">
+            {/* ЛЕВАЯ ЧАСТЬ */}
+            <div className="space-y-4 text-sm">
+              <InfoRow label="Имя" value={user.name} />
+              <InfoRow label="Email" value={user.email} />
+              <InfoRow label="Роль" value={isTrainer ? "Тренер" : "Клиент"} />
+
+              {/* ТРЕНЕР */}
+              {isTrainer && user.bio && (
+                <div className="pt-6">
+                  <h3 className="mb-2 text-white/80">Биография:</h3>
+                  <p className="text-white/70 leading-relaxed whitespace-pre-line">
+                    {user.bio}
+                  </p>
+                </div>
+              )}
+
+              {/* КЛИЕНТ */}
+              {!isTrainer && (
+                <div className="pt-6 space-y-2">
+                  <ProfileItem
+                    label="Возраст"
+                    value={meta.age ? `${meta.age} лет` : "—"}
+                  />
+                  <ProfileItem
+                    label="Уровень подготовки"
+                    value={meta.fitness_level || "—"}
+                  />
+                  <ProfileItem label="Цель" value={meta.goal || "—"} />
+                </div>
+              )}
+            </div>
+
+            {/* ПРАВАЯ ЧАСТЬ */}
+            <div className="flex flex-col items-center gap-4">
               <div
-                className="relative cursor-pointer transition-all hover:scale-105"
+                className="relative w-40 h-40 rounded-full overflow-hidden border-2 border-[#1E79AD] cursor-pointer group"
                 onClick={handleAvatarClick}
               >
-                {/* Обязательно добавляем pointer-events-none к Image */}
-                {user?.avatar_url ? (
-                  <Image
-                    src={user.avatar_url + "?t=" + Date.now()}
-                    alt="Аватар"
-                    width={112}
-                    height={112}
-                    className="w-28 h-28 rounded-full object-cover shadow-xl border-4 border-white pointer-events-none"
-                    unoptimized
-                  />
-                ) : (
-                  fallbackAvatar
-                )}
+                <Image
+                  src={user.avatar_url || "/avatar-placeholder.png"}
+                  alt="avatar"
+                  fill
+                  unoptimized
+                  className="object-cover pointer-events-none"
+                />
 
-                {/* Оверлей с камерой */}
-                <div className="absolute inset-0 rounded-full bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                  <svg
-                    className="w-10 h-10 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 9a2 2 0 012-2h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                  </svg>
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-sm pointer-events-none">
+                  Сменить фото
                 </div>
               </div>
 
-              {/* Скрытый input */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setEditOpen(true);
+                }}
+                className="px-4 py-2 bg-[#1E79AD] hover:bg-[#145073] transition rounded-xl text-sm"
+              >
+                Редактировать профиль
+              </button>
+
               <input
                 ref={fileInputRef}
                 type="file"
@@ -153,85 +165,50 @@ export default function ProfileSection() {
                 onChange={onFileChange}
                 className="hidden"
               />
-            </div>
 
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm text-gray-600">Имя</p>
-                <p className="text-xl font-semibold text-gray-800">
-                  {user?.name}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Email</p>
-                <p className="text-lg text-gray-800">{user?.email}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Роль в клубе</p>
-                <span
-                  className={`inline-block px-4 py-2 rounded-full text-sm font-medium ${roleColor}`}
-                >
-                  {roleText}
-                </span>
-              </div>
+              <button
+                onClick={logout}
+                className="px-4 py-2 bg-red-600/80 hover:bg-red-700 transition rounded-xl text-sm"
+              >
+                Выйти из аккаунта
+              </button>
             </div>
           </div>
-
-          <p className="text-sm text-gray-500 mt-4">
-            Нажмите на аватар, чтобы изменить фото
-          </p>
         </div>
       </section>
 
-      {/* Модалка с обрезкой */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6">
-            <h3 className="text-2xl font-bold mb-4">Обрезка аватара</h3>
+      <EditProfileModal isOpen={editOpen} onClose={() => setEditOpen(false)} />
 
-            <div className="relative h-96 bg-gray-100 rounded-lg overflow-hidden">
+      {/* МОДАЛКА ОБРЕЗКИ */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+          <div className="bg-black rounded-2xl max-w-lg w-full p-6 border border-[#1E79AD] text-white">
+            <h3 className="text-xl mb-4">Обрезка аватара</h3>
+
+            <div className="relative h-80 rounded-xl overflow-hidden bg-black">
               <Cropper
                 image={imageSrc!}
                 crop={crop}
                 zoom={zoom}
                 aspect={1}
                 cropShape="round"
-                showGrid={false}
                 onCropChange={setCrop}
                 onZoomChange={setZoom}
                 onCropComplete={onCropComplete}
               />
             </div>
 
-            <div className="mt-4 flex items-center gap-4">
-              <input
-                type="range"
-                min="1"
-                max="3"
-                step="0.1"
-                value={zoom}
-                onChange={(e) => setZoom(Number(e.target.value))}
-                className="flex-1"
-              />
-              <span className="text-sm text-gray-600">
-                {Math.round(zoom * 100)}%
-              </span>
-            </div>
-
             <div className="flex gap-3 mt-6">
               <button
-                onClick={() => {
-                  setIsModalOpen(false);
-                  setImageSrc(null);
-                }}
-                className="flex-1 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                onClick={() => setIsModalOpen(false)}
+                className="flex-1 py-3 border border-white/20 rounded-lg"
               >
                 Отмена
               </button>
               <button
                 onClick={uploadCroppedImage}
                 disabled={isUploading}
-                className="flex-1 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-70 transition"
+                className="flex-1 py-3 bg-[#1E79AD] rounded-lg"
               >
                 {isUploading ? "Загрузка..." : "Сохранить"}
               </button>
@@ -240,5 +217,25 @@ export default function ProfileSection() {
         </div>
       )}
     </>
+  );
+}
+
+/* ---------- ВСПОМОГАТЕЛЬНЫЕ ---------- */
+
+function InfoRow({ label, value }: { label: string; value?: string }) {
+  return (
+    <div className="flex border-b border-white/10 pb-2">
+      <span className="w-40 text-white/60">{label}:</span>
+      <span>{value || "—"}</span>
+    </div>
+  );
+}
+
+function ProfileItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <span className="text-white/60">{label}:</span>
+      <span className="ml-2">{value}</span>
+    </div>
   );
 }

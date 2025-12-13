@@ -12,6 +12,12 @@ interface User {
   role_id: number;
   avatar?: string | null;
   avatar_url?: string | null;
+  bio?: string;
+  metadata?: {
+    age?: number;
+    fitness_level?: string;
+    goal?: string;
+  };
 }
 
 interface AuthState {
