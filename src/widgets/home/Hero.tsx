@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useAuthStore } from "@/store/authStore";
-import { useState, useEffect } from "react";
-
+import { useEffect, useState } from "react";
+// type: "single" | "monthly" | "yearly";
 interface HeroData {
   title: string;
   description: string;
@@ -15,9 +15,7 @@ interface HeroData {
 }
 
 export default function Hero() {
-  const { user, token } = useAuthStore();
-  const isAdmin = user?.role_id === 1;
-  const isTrainer = user?.role_id === 2;
+  const { token } = useAuthStore();
 
   const [heroData, setHeroData] = useState<HeroData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -25,15 +23,14 @@ export default function Hero() {
   useEffect(() => {
     const fetchHeroData = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
-        const response = await fetch(`${apiUrl}/api/hero`);
-        const result = await response.json();
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+        const res = await fetch(`${apiUrl}/api/hero`);
+        const data = await res.json();
 
-        if (result.success) {
-          setHeroData(result.data);
-        }
-      } catch (error) {
-        console.error('Error fetching hero data:', error);
+        if (data.success) setHeroData(data.data);
+      } catch (e) {
+        console.error("Ошибка загрузки Hero:", e);
       } finally {
         setLoading(false);
       }
@@ -44,103 +41,112 @@ export default function Hero() {
 
   if (loading) {
     return (
-      <section className="relative w-full h-[650px] bg-gray-900 flex items-center justify-center">
-        <div className="text-white text-xl">Загрузка...</div>
+      <section className="relative w-full min-h-[500px] flex items-center justify-center bg-black">
+        <p className="text-white text-lg">Загрузка...</p>
       </section>
     );
   }
 
   return (
-    <section
-      className="
-        relative w-full h-[650px] bg-cover bg-center bg-no-repeat
-      "
-      style={{
-        backgroundImage: heroData?.image_url
-          ? `url('${heroData.image_url}')`
-          : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" // fallback градиент
-      }}
-    >
-      {/* Тёмный оверлей */}
+    <section className="relative w-full min-h-[600px] md:h-[650px] lg:h-[850px]">
+      {/* Фон */}
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 bg-cover bg-center"
         style={{
-          background: heroData?.extra_data?.background_overlay || 'rgba(0,0,0,0.5)'
+          backgroundImage: heroData?.image_url
+            ? `url('${heroData.image_url}')`
+            : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
         }}
       />
 
-      {/* Контент внутри */}
-      <div className="relative max-w-5xl mx-auto px-6 pt-6 pb-20">
-        <div className="bg-black/40 backdrop-blur-sm p-10 rounded-2xl shadow-xl"
-             style={{ color: heroData?.extra_data?.text_color || '#ffffff' }}>
+      {/* Overlay */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            heroData?.extra_data?.background_overlay || "rgba(0,0,0,0.8)",
+        }}
+      />
 
-          <h2 className="text-2xl md:text-3xl font-semibold mb-6 leading-snug">
-            {heroData?.title || "Почему выбирают именно нас? Потому что мы создали фитнес без отговорок."}
-          </h2>
-
-          <div className="text-[17px] leading-relaxed opacity-90 whitespace-pre-line">
-            {heroData?.description || `• Команда, которая вдохновляет: Наши тренеры — не просто инструкторы, а ваши персональные мотиваторы. Они найдут подход к каждому и добьются результата вместе с вами.
-
-• Атмосфера, в которую хочется возвращаться: Чистота, современное оборудование и дружелюбные сотрудники. Здесь вас поддержат и всегда рады видеть.
-
-• Результат, который вы полюбите: Мы помогаем не просто похудеть или накачаться, а полюбить своё тело и ощутить радость от движения.`}
+      {/* Контент */}
+      <div className="relative h-full flex items-center justify-center md:justify-end px-4 sm:px-6 md:px-14 py-10">
+        <div
+          className="
+            w-full
+            max-w-md
+            bg-black/70
+            backdrop-blur-md
+            rounded-2xl
+            shadow-xl
+            px-6 py-8
+            sm:px-8 sm:py-9
+            md:p-10
+          "
+          style={{
+            color: heroData?.extra_data?.text_color || "#fff",
+            boxShadow: "0 0 40px rgba(30, 121, 173, 0.5)",
+          }}
+        >
+          {/* Логотип */}
+          <div className="mb-4 text-center">
+            <span className="block text-[18px] sm:text-[22px] md:text-[24px] text-[#1E79AD] font-mono tracking-widest">
+              ADRENALINE
+            </span>
+            <span className="block text-[14px] sm:text-[15px] md:text-[16px] tracking-wide">
+              FITNESS
+            </span>
           </div>
 
-          <p className="mt-8 text-lg opacity-90">
-            Приходите в{" "}
-            <Link href="/" className="text-blue-400 hover:text-blue-300 underline transition">
-              Adrenaline Fitness
-            </Link>
-            . Начните меняться к лучшему с удовольствием.
+          {/* Заголовок */}
+          <h2 className="text-[18px] sm:text-[20px] md:text-[24px] font-semibold mb-4">
+            {heroData?.title}
+          </h2>
+
+          {/* Описание */}
+          <p className="text-[14px] sm:text-[16px] md:text-[18px] leading-relaxed opacity-90 mb-6 md:mb-8 whitespace-pre-line">
+            {heroData?.description}
           </p>
 
-          {/* Кнопки под текстом (только если не авторизован) */}
+          {/* Кнопка */}
           {!token ? (
-            <div className="flex flex-col sm:flex-row gap-4 mt-10">
-              <Link
-                href="/register"
-                className="bg-pink-500 hover:bg-pink-600 transition text-white px-8 py-3 rounded-xl font-semibold"
-              >
-                Присоединиться
-              </Link>
-
-              <Link
-                href="/login"
-                className="bg-white/20 border border-white/40 hover:bg-white/30 transition text-white px-8 py-3 rounded-xl font-semibold backdrop-blur-sm"
-              >
-                Войти
-              </Link>
-            </div>
+            <Link
+              href="/register"
+              className="
+                w-full block
+                bg-[#404096]
+                hover:bg-[#1c1c4f]
+                transition
+                text-center
+                py-3
+                rounded-xl
+                font-semibold
+                text-sm sm:text-base
+              "
+            >
+              Регистрация / Вход
+            </Link>
           ) : (
-            <div className="flex flex-wrap gap-6 items-center text-lg mt-8 opacity-90">
-
-              <Link
-                href="/dashboard"
-                className="text-blue-300 hover:text-blue-200 underline transition"
-              >
-                Личный кабинет
-              </Link>
-
-              {isTrainer && (
-                <Link
-                  href="/trainer"
-                  className="text-blue-300 hover:text-blue-200 underline transition"
-                >
-                  Кабинет тренера
-                </Link>
-              )}
-
-              {isAdmin && (
-                <a
-                  href="http://127.0.0.1:8000/admin"
-                  target="_blank"
-                  className="text-purple-300 hover:text-purple-200 underline transition"
-                >
-                  Админ-панель
-                </a>
-              )}
-            </div>
+            <Link
+              href="/dashboard"
+              className="
+                w-full block
+                bg-[#404096]
+                hover:bg-[#1c1c4f]
+                transition
+                text-center
+                py-3
+                rounded-xl
+                font-semibold
+                text-sm sm:text-base
+              "
+            >
+              Перейти в кабинет
+            </Link>
           )}
+
+          <p className="mt-3 text-[11px] sm:text-[12px] opacity-70 text-center">
+            Мы рады, что вы выбрали нас!
+          </p>
         </div>
       </div>
     </section>

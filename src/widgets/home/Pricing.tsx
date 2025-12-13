@@ -2,111 +2,176 @@
 
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
-import Link from "next/link";
 import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "next/navigation";
 import PurchaseModal from "@/shared/ui/PurchaseModal";
+import Link from "next/link";
 
-// 🚨 ОФИЦИАЛЬНОЕ ОПРЕДЕЛЕНИЕ ИНТЕРФЕЙСА SERVICE
-// Используем 'title' вместо 'name'
+interface Benefit {
+  benefit: string;
+}
+
 interface Service {
   id: number;
-  title: string; 
-  price_cents: number;
-  duration_days: number;
+  title: string;
   description?: string;
-  visits_limit?: number;
+  base_benefits?: Benefit[]; // Новое поле
+  duration_days: number;
+  visits_limit?: number | null;
+  price_cents: number;
+  currency: string;
+  active: boolean;
+  type: "single" | "monthly" | "yearly";
 }
 
 export default function Pricing() {
   const router = useRouter();
+  const { token } = useAuthStore();
+
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
-  const { token } = useAuthStore(); 
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  // Используем унифицированный интерфейс Service
   const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // 1. Загрузка данных
   useEffect(() => {
-    api.get('/services')
-      .then((res) => setServices(res.data))
-      .catch((err) => console.error("Ошибка загрузки тарифов:", err))
+    api
+      .get<Service[]>("/services") // Указываем тип напрямую — массив услуг
+      .then((res) => {
+        // Если API возвращает массив напрямую — res.data уже массив
+        // Если возвращает { data: [...] } — берём res.data.data
+        const servicesData = Array.isArray(res.data)
+          ? res.data
+          : res.data.data || [];
+
+        // Фильтруем только активные
+        const activeServices = servicesData.filter((s) => s.active);
+
+        setServices(activeServices);
+      })
+      .catch((e) => {
+        console.error("Ошибка загрузки тарифов:", e);
+        setServices([]); // На случай ошибки — пустой список
+      })
       .finally(() => setLoading(false));
   }, []);
 
-  // 2. Обработка нажатия кнопки "Купить"
-  const handleSelectService = (service: Service) => {
+  const handleBuy = (service: Service) => {
     if (!token) {
-        router.push('/login');
-        return;
+      router.push("/login");
+      return;
     }
     setSelectedService(service);
     setIsModalOpen(true);
   };
-  
+
+  const formatPrice = (priceCents: number) => {
+    return (priceCents / 100).toLocaleString("ru-RU", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    });
+  };
+
   return (
-    <> 
-      <section className="py-24 bg-white" id="pricing">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Клубные карты</h2>
-            <p className="text-gray-600 text-lg">Выберите формат, который подходит именно вам.</p>
+    <>
+      <section className="py-24 bg-[#0b0b0b]" id="pricing">
+        <div className="max-w-7xl mx-auto px-6">
+          {/* Заголовок */}
+          <div className="mb-12">
+            <span className="inline-block bg-[#1E79AD] text-white px-4 py-2 rounded-lg text-sm font-semibold">
+              АБОНЕМЕНТЫ
+            </span>
           </div>
 
           {loading ? (
-            <div className="flex justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <div className="flex justify-center text-white text-lg">
+              Загрузка тарифов...
+            </div>
+          ) : services.length === 0 ? (
+            <div className="text-center text-white/70">
+              В настоящее время нет доступных абонементов.
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {services.map((service) => {
-                const price = service.price_cents / 100;
-                
-                return (
-                  <div key={service.id} className="border border-gray-200 rounded-3xl p-8 hover:shadow-xl transition flex flex-col relative bg-white group hover:-translate-y-2 duration-300">
-                    
-                    {service.duration_days >= 90 && (
-                      <div className="absolute top-0 right-0 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-bl-2xl rounded-tr-2xl">
-                        ЛУЧШИЙ ВЫБОР
-                      </div>
-                    )}
+                const hasUnlimitedVisits = service.visits_limit === null;
 
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">{service.title}</h3> {/* ИСПОЛЬЗУЕМ title */}
-                    
-                    <div className="my-6">
-                      <span className="text-4xl font-extrabold text-blue-600">{price.toLocaleString('ru-RU', { maximumFractionDigits: 0 })} ₽</span>
-                      <span className="text-gray-400 text-sm"> / {service.duration_days} дн.</span>
+                return (
+                  <div
+                    key={service.id}
+                    className="
+                      bg-[#121212]
+                      border border-white/10
+                      rounded-2xl
+                      p-6
+                      flex flex-col
+                      hover:border-[#1E79AD] hover:shadow-lg
+                      transition-all duration-300
+                    "
+                  >
+                    {/* Декоративный элемент */}
+                    <div className="flex justify-center items-center">
+                      {/* Декоративный элемент — перекрещенные стрелки как на фото */}
+                      <div className="flex justify-center items-center mb-8 w-40 h-40 relative">
+                        {/* Белая стрелка сзади (повёрнута на -45°) */}
+                        <div className="absolute inset-0 flex items-center justify-center rotate-[-45deg]">
+                          <div className="w-full h-1 bg-white/30 relative"></div>
+                        </div>
+                        {/* Синяя стрелка спереди (повёрнута на 45°) */}
+                        <div className="absolute inset-0 flex items-center justify-center rotate-45">
+                          <div className="w-full h-1 bg-[#1E79AD] relative"></div>
+                        </div>
+                      </div>
                     </div>
 
-                    <ul className="space-y-4 mb-8 text-gray-600 grow">
-                      <li className="flex items-center">
-                        <span className="text-green-500 mr-2 font-bold">✓</span>
-                        Доступ в тренажерный зал
-                      </li>
-                      {service.visits_limit ? (
-                        <li className="flex items-center">
-                          <span className="text-blue-500 mr-2 font-bold">ℹ</span>
-                          Количество посещений: <strong>{service.visits_limit}</strong>
-                        </li>
+                    <h3 className="text-white font-bold text-xl text-center mb-3">
+                      {service.title}
+                    </h3>
+
+                    {service.description && (
+                      <p className="text-sm text-white/70 text-center mb-5">
+                        {service.description}
+                      </p>
+                    )}
+
+                    {/* Список преимуществ из base_benefits */}
+                    <ul className="text-sm text-white/80 space-y-2 mb-6 flex-1">
+                      {service.base_benefits &&
+                      service.base_benefits.length > 0 ? (
+                        service.base_benefits.map((item, index) => (
+                          <li key={index}>• {item.benefit}</li>
+                        ))
                       ) : (
-                        <li className="flex items-center">
-                          <span className="text-green-500 mr-2 font-bold">✓</span>
-                          Безлимитные посещения
-                        </li>
+                        <>
+                          <li>• Срок действия: {service.duration_days} дней</li>
+                          <li>
+                            •{" "}
+                            {hasUnlimitedVisits
+                              ? "Безлимитные посещения"
+                              : `${service.visits_limit} посещений`}
+                          </li>
+                          <li>• Душевые и раздевалки</li>
+                        </>
                       )}
-                      <li className="flex items-center">
-                        <span className="text-green-500 mr-2 font-bold">✓</span>
-                        Душевые и сауна
-                      </li>
                     </ul>
 
-                    <button 
-                      onClick={() => handleSelectService(service)}
-                      className="w-full py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition shadow-md"
+                    {/* Цена */}
+                    <div className="text-center mb-6">
+                      <span className="text-3xl font-bold text-[#1E79AD]">
+                        {formatPrice(service.price_cents)} ₽
+                      </span>
+                      {service.type !== "single" && (
+                        <span className="block text-xs text-white/60 mt-1">
+                          /{service.type === "monthly" ? "мес" : "год"}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Кнопка */}
+                    <button
+                      onClick={() => handleBuy(service)}
+                      className="mt-auto bg-[#1E79AD] hover:bg-[#145073] text-white font-medium py-3 rounded-lg transition shadow-md"
                     >
-                      Купить абонемент
+                      Оформить
                     </button>
                   </div>
                 );
@@ -116,10 +181,13 @@ export default function Pricing() {
         </div>
       </section>
 
-      <PurchaseModal 
+      <PurchaseModal
         service={selectedService}
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedService(null);
+        }}
       />
     </>
   );

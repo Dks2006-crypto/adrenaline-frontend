@@ -12,10 +12,10 @@ export default function HomePage() {
     <div className="bg-linear-to-br from-indigo-50 to-blue-100 min-h-screen">
       
       <Hero />
+      <Pricing />
       <Features />
       <GroupClasses />
       <TrainersWidget />
-      <Pricing />
 
     </div>
   );
