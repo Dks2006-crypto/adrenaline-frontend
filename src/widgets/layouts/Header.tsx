@@ -1,9 +1,48 @@
 "use client";
 
 import Link from "next/link";
+import api from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
+import { useEffect, useState } from "react";
+
+interface SiteSettings {
+  site_name: string;
+  description: string;
+  email: string;
+  phone: string;
+  address: string;
+  vk_url?: string;
+  telegram_url?: string;
+  instagram_url?: string;
+}
 
 export default function Header() {
+
+
+  const [settings, setSettings] = useState<SiteSettings>({
+    site_name: "ADRENALINE FITNESS",
+    description: "Ваш лучший фитнес-зал с незабываемыми ощущениями",
+    email: "ADRENALINE.FITNESS@host.fun",
+    phone: "+7 (903)338-41-41",
+    address: "Двинская, 11, Волгоград",
+    vk_url: "",
+    telegram_url: "",
+    instagram_url: "",
+  });
+
+  useEffect(() => {
+    api
+      .get("/site-settings")
+      .then((res) => {
+        if (res.data) setSettings(res.data);
+      })
+      .catch(() => {
+        // Если API недоступно — используем fallback
+      });
+  }, []);
+
+  const currentYear = new Date().getFullYear();
+
   const { token } = useAuthStore();
 
   return (
@@ -16,10 +55,12 @@ export default function Header() {
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <span>с 9:00 до 18:00</span>
             <span className="hidden sm:inline">•</span>
-            <span>+7 (903) 333-41-41</span>
+            <a href={`tel:${settings.phone.replace(/[^+\d]/g, "")}`} className="hover:text-[#1E79AD] transition">
+                  {settings.phone}
+                </a>
             <span className="hidden md:inline">•</span>
             <span className="hidden md:inline">
-              Двинская, 11 Волгоград
+              {settings.address}
             </span>
           </div>
 

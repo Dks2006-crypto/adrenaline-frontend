@@ -17,7 +17,7 @@ export default function HomePage() {
       <GroupClasses />
       <TrainersWidget />
       <GallerySection />
-      <Features />
+      {/* <Features /> */}
 
     </div>
   );
