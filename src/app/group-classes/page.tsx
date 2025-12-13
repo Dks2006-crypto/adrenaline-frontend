@@ -9,24 +9,19 @@ export default function GroupClassesPage() {
   const [groupClasses, setGroupClasses] = useState<GroupClassListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<'all' | 'available' | 'upcoming'>('all');
   const { token } = useAuthStore();
 
   useEffect(() => {
     const fetchGroupClasses = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
         const response = await fetch(`${apiUrl}/api/group-classes`);
 
-        if (!response.ok) {
-          throw new Error('Не удалось загрузить групповые занятия');
-        }
-
+        if (!response.ok) throw new Error("Не удалось загрузить групповые занятия");
         const data = await response.json();
         setGroupClasses(data);
-      } catch (error) {
-        console.error('Error fetching group classes:', error);
-        setError(error instanceof Error ? error.message : 'Произошла ошибка при загрузке');
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Ошибка загрузки");
       } finally {
         setLoading(false);
       }
@@ -35,30 +30,62 @@ export default function GroupClassesPage() {
     fetchGroupClasses();
   }, []);
 
-  const filteredClasses = groupClasses.filter((groupClass) => {
-    if (filter === 'available') {
-      return groupClass.available_slots > 0;
-    }
-    if (filter === 'upcoming') {
-      return new Date(groupClass.starts_at) > new Date();
-    }
-    return true;
-  });
+  /* Увеличенные V-декорации — как в твоём последнем коде */
+  const VDecor = () => (
+    <div className="flex justify-center items-center mb-8 w-32 h-32 relative mx-auto">
+      {/* Белая перевёрнутая V сзади */}
+      <svg
+        className="absolute w-52 h-52 opacity-45"
+        viewBox="0 0 100 100"
+        aria-hidden="true"
+      >
+        <path
+          d="M 22 78 L 50 28 L 78 78"
+          fill="none"
+          stroke="white"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+      </svg>
+
+      {/* Синяя нормальная V спереди */}
+      <svg
+        className="absolute w-52 h-52"
+        viewBox="0 0 100 100"
+        aria-hidden="true"
+      >
+        <path
+          d="M 20 22 L 50 80 L 80 22"
+          fill="none"
+          stroke="#1E79AD"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+      </svg>
+    </div>
+  );
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-900 py-20">
+      <div className="min-h-screen bg-[#0b0b0b] py-24">
         <div className="max-w-7xl mx-auto px-6">
-          <h1 className="text-3xl font-bold text-white mb-12">Групповые занятия</h1>
+          <div className="mb-12">
+            <span className="inline-block bg-[#1E79AD] text-white px-8 py-4 rounded-xl text-xl font-semibold">
+              ГРУППОВЫЕ ЗАНЯТИЯ
+            </span>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3, 4, 5, 6].map((item) => (
-              <div key={item} className="bg-gray-800 rounded-xl p-6 animate-pulse">
-                <div className="h-4 bg-gray-700 rounded mb-4"></div>
-                <div className="h-3 bg-gray-700 rounded mb-2"></div>
-                <div className="h-3 bg-gray-700 rounded mb-4"></div>
-                <div className="flex justify-between items-center">
-                  <div className="h-8 bg-gray-700 rounded w-24"></div>
-                  <div className="h-8 bg-gray-700 rounded w-20"></div>
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div
+                key={i}
+                className="bg-[#121212] border border-white/10 rounded-2xl p-8 animate-pulse"
+              >
+                <div className="h-32 bg-white/5 rounded-full mb-6 mx-auto"></div>
+                <div className="h-6 bg-white/10 rounded mx-auto w-48 mb-6"></div>
+                <div className="space-y-4">
+                  <div className="h-4 bg-white/10 rounded"></div>
+                  <div className="h-4 bg-white/10 rounded w-4/5"></div>
+                  <div className="h-4 bg-white/10 rounded w-3/5"></div>
                 </div>
               </div>
             ))}
@@ -68,13 +95,17 @@ export default function GroupClassesPage() {
     );
   }
 
-  if (error) {
+  if (error || groupClasses.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-900 py-20">
+      <div className="min-h-screen bg-[#0b0b0b] py-24">
         <div className="max-w-7xl mx-auto px-6">
-          <h1 className="text-3xl font-bold text-white mb-12">Групповые занятия</h1>
-          <div className="bg-red-900/50 border border-red-800 rounded-xl p-6 text-red-200">
-            {error}
+          <div className="mb-12">
+            <span className="inline-block bg-[#1E79AD] text-white px-8 py-4 rounded-xl text-xl font-semibold">
+              ГРУППОВЫЕ ЗАНЯТИЯ
+            </span>
+          </div>
+          <div className="text-center text-white/70 text-xl">
+            {error || "В настоящее время нет доступных групповых занятий."}
           </div>
         </div>
       </div>
@@ -82,124 +113,142 @@ export default function GroupClassesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 py-20">
+    <div className="min-h-screen bg-[#141414] py-24">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
-          <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Групповые занятия</h1>
-            <p className="text-gray-400">Присоединяйтесь к нашим групповым тренировкам с профессиональными тренерами</p>
-          </div>
-
-          <div className="flex gap-4">
-            <select
-              value={filter}
-              onChange={(e) => setFilter(e.target.value as 'all' | 'available' | 'upcoming')}
-              className="bg-gray-800 border border-gray-700 rounded-xl px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-pink-500"
-            >
-              <option value="all">Все занятия</option>
-              <option value="available">Только с местами</option>
-              <option value="upcoming">Предстоящие</option>
-            </select>
-
-            {token && (
-              <Link
-                href="/dashboard"
-                className="bg-pink-500 hover:bg-pink-600 text-white px-6 py-2 rounded-xl font-semibold transition"
-              >
-                Личный кабинет
-              </Link>
-            )}
-          </div>
+        {/* Заголовок */}
+        <div className="mb-16 text-center">
+          <span className="inline-block bg-[#1E79AD] text-white px-8 py-4 rounded-xl text-xl font-semibold">
+            ГРУППОВЫЕ ЗАНЯТИЯ
+          </span>
+          <p className="mt-6 text-white/70 text-lg max-w-3xl mx-auto">
+            Присоединяйтесь к нашим профессиональным групповым тренировкам под руководством опытных тренеров
+          </p>
         </div>
 
-        {filteredClasses.length === 0 ? (
-          <div className="bg-gray-800 rounded-xl p-8 text-center text-gray-400">
-            <h2 className="text-xl font-semibold mb-2">Нет доступных занятий</h2>
-            <p>Попробуйте изменить фильтры или проверьте позже</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredClasses.map((groupClass) => (
-              <div key={groupClass.id} className="bg-gray-800 rounded-xl p-6 hover:bg-gray-700 transition group">
-                <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-xl font-semibold text-white">{groupClass.title}</h3>
-                  {groupClass.service && (
-                    <span className="bg-blue-600 text-white text-xs px-3 py-1 rounded-full">
-                      {groupClass.service.title}
+        {/* Сетка карточек */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+          {groupClasses.map((cls) => {
+            const date = new Date(cls.starts_at);
+            const timeStart = date.toLocaleTimeString("ru-RU", {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+            const timeEnd = new Date(cls.ends_at).toLocaleTimeString("ru-RU", {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+
+            return (
+              <div
+                key={cls.id}
+                className="
+                  bg-[#121212]
+                  border border-white/10
+                  rounded-2xl
+                  p-8
+                  flex flex-col
+                  hover:border-[#1E79AD]
+                  hover:shadow-2xl
+                  transition-all duration-300
+                  group
+                "
+              >
+                {/* V-декорация */}
+                <VDecor />
+
+                {/* Название */}
+                <h3 className="text-white font-bold text-2xl text-center mb-8">
+                  {cls.title}
+                </h3>
+
+                {/* Информация */}
+                <div className="space-y-5 text-white/80 mb-10 flex-1">
+                  <div className="flex justify-between">
+                    <span className="text-white/60">Дата и время:</span>
+                    <span className="text-right font-medium">
+                      {date.toLocaleDateString("ru-RU")} в {timeStart}
                     </span>
+                  </div>
+
+                  <div className="flex justify-between">
+                    <span className="text-white/60">Продолжительность:</span>
+                    <span className="font-medium">{timeStart} – {timeEnd}</span>
+                  </div>
+
+                  <div className="flex justify-between">
+                    <span className="text-white/60">Вместимость:</span>
+                    <span className="font-medium">{cls.capacity} человек</span>
+                  </div>
+
+                  <div className="flex justify-between">
+                    <span className="text-white/60">Свободно мест:</span>
+                    <span className={`font-bold ${cls.available_slots <= 3 ? "text-red-400" : "text-green-400"}`}>
+                      {cls.available_slots}
+                    </span>
+                  </div>
+
+                  {cls.service && (
+                    <div className="flex justify-between">
+                      <span className="text-white/60">Программа:</span>
+                      <span className="text-right font-medium">{cls.service.title}</span>
+                    </div>
+                  )}
+
+                  {cls.trainer && (
+                    <div className="flex justify-between">
+                      <span className="text-white/60">Тренер:</span>
+                      <span className="text-right font-medium">
+                        {cls.trainer.name} {cls.trainer.last_name || ""}
+                      </span>
+                    </div>
                   )}
                 </div>
 
-                {groupClass.description && (
-                  <p className="text-gray-300 mb-4 line-clamp-3">
-                    {groupClass.description}
-                  </p>
-                )}
+                {/* Кнопки */}
+                <div className="flex gap-4 mt-auto">
+                  <Link
+                    href={`/group-classes/${cls.id}`}
+                    className="flex-1 text-center bg-[#1E79AD]/20 hover:bg-[#1E79AD]/30 text-[#1E79AD] py-3.5 rounded-xl font-semibold transition"
+                  >
+                    Подробнее
+                  </Link>
 
-                <div className="flex items-center mb-4">
-                  {groupClass.trainer?.avatar_url && (
-                    <img
-                      src={groupClass.trainer.avatar_url}
-                      alt={`${groupClass.trainer.name} ${groupClass.trainer.last_name}`}
-                      className="w-8 h-8 rounded-full mr-3"
-                    />
+                  {cls.available_slots > 0 ? (
+                    <Link
+                      href={`/group-classes/${cls.id}`}
+                      className="flex-1 text-center bg-[#1E79AD] hover:bg-[#145073] text-white py-3.5 rounded-xl font-semibold transition"
+                    >
+                      Записаться
+                    </Link>
+                  ) : (
+                    <button
+                      disabled
+                      className="flex-1 text-center bg-gray-700 text-gray-500 py-3.5 rounded-xl cursor-not-allowed font-medium"
+                    >
+                      Нет мест
+                    </button>
                   )}
-                  <div>
-                    <p className="text-sm text-gray-400">Тренер:</p>
-                    <p className="text-white font-medium">
-                      {groupClass.trainer ? `${groupClass.trainer.name} ${groupClass.trainer.last_name}` : 'Не назначен'}
-                    </p>
-                  </div>
                 </div>
-
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div>
-                    <p className="text-sm text-gray-400">Начало:</p>
-                    <p className="text-white font-medium">
-                      {new Date(groupClass.starts_at).toLocaleString('ru-RU', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-400">Окончание:</p>
-                    <p className="text-white font-medium">
-                      {new Date(groupClass.ends_at).toLocaleString('ru-RU', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex justify-between items-center mb-6">
-                  <div>
-                    <p className="text-sm text-gray-400">Свободных мест:</p>
-                    <p className={`text-white font-bold text-lg ${groupClass.available_slots <= 3 ? 'text-red-400' : ''}`}>
-                      {groupClass.available_slots} из {groupClass.capacity}
-                    </p>
-                  </div>
-
-                  <div className="text-right">
-                    <p className="text-sm text-gray-400">Стоимость:</p>
-                    <p className="text-white font-bold text-lg">
-                      {(groupClass.price_cents / 100).toLocaleString('ru-RU')} {groupClass.currency}
-                    </p>
-                  </div>
-                </div>
-
-                <Link
-                  href={`/group-classes/${groupClass.id}`}
-                  className="block w-full text-center bg-pink-500 hover:bg-pink-600 transition text-white px-6 py-3 rounded-xl font-semibold group-hover:bg-pink-600"
-                >
-                  Подробнее
-                </Link>
               </div>
-            ))}
+            );
+          })}
+        </div>
+
+        {/* Подвал */}
+        {token && (
+          <div className="mt-16 flex justify-center items-center gap-16">
+            <Link
+              href="/dashboard"
+              className="inline-block bg-[#1E79AD] hover:bg-[#145073] text-white px-10 py-4 rounded-xl text-lg font-semibold transition"
+            >
+              Перейти в личный кабинет
+            </Link>
+            <Link
+              href="/"
+              className="inline-block bg-[#1E79AD] hover:bg-[#145073] text-white px-10 py-4 rounded-xl text-lg font-semibold transition"
+            >
+              На главную
+            </Link>
           </div>
         )}
       </div>

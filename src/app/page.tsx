@@ -13,9 +13,9 @@ export default function HomePage() {
       
       <Hero />
       <Pricing />
-      <Features />
       <GroupClasses />
       <TrainersWidget />
+      <Features />
 
     </div>
   );

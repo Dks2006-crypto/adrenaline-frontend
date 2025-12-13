@@ -73,7 +73,7 @@ export default function Pricing() {
 
   return (
     <>
-      <section className="py-24 bg-[#0b0b0b]" id="pricing">
+      <section className="py-24 bg-[#111111]" id="pricing">
         <div className="max-w-7xl mx-auto px-6">
           {/* Заголовок */}
           <div className="mb-12">
