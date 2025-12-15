@@ -28,14 +28,14 @@ export default function GallerySection() {
   }, []);
 
   return (
-    <section className="py-24 bg-[#0b0b0b]" id="gallery">
+    <section className="py-24 bg-[#202030]" id="gallery">
       <div className="max-w-7xl mx-auto px-6">
         {/* Заголовок */}
-        <div className="mb-16 text-center">
-          <span className="inline-block bg-[#1E79AD] text-white px-8 py-4 rounded-xl text-xl font-semibold">
+        <div className="mb-16">
+          <span className="inline-block text-start bg-[#1E79AD] text-white px-8 py-4 rounded-xl text-xl font-semibold">
             ГАЛЕРЕЯ
           </span>
-          <h2 className="mt-6 text-4xl md:text-5xl font-bold text-white">
+          <h2 className="mt-6 text-4xl text-center md:text-5xl font-bold text-white">
             Наши <span className="text-[#1E79AD]">лучшие</span> программы
           </h2>
         </div>

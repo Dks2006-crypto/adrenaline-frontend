@@ -8,10 +8,7 @@ import "swiper/css/pagination";
 
 import TrainerCard from "./TrainerCard";
 import { useTrainerList } from "../lib/hooks/useTrainerList";
-
-interface TrainerListProps {
-  onBook: (trainerId: number) => void;
-}
+import { TrainerListProps } from './types';
 
 export default function TrainerList({ onBook }: TrainerListProps) {
   const { trainers, loading } = useTrainerList();

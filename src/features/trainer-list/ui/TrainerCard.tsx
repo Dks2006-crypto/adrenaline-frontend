@@ -1,42 +1,30 @@
 import Image from "next/image";
 import { useState } from "react";
+import { TrainerCardProps } from './types';
 
-interface Trainer {
-  id: number;
-  name: string;
-  last_name?: string | null;
-  avatar_url?: string | null;
-  bio?: string | null;
-  specialties?: string[] | null; // Теперь массив строк
-}
-
-interface TrainerCardProps {
-  trainer: Trainer;
-  onBook: (trainerId: number) => void;
-}
+/* V-декорация — только если нет фото */
+const VDecor = () => (
+  <div className="flex justify-center items-center w-full h-full relative">
+    {/* Белая перевёрнутая V сзади */}
+    <svg className="absolute w-64 h-64 opacity-45" viewBox="0 0 100 100" aria-hidden="true">
+      <path d="M 22 78 L 50 28 L 78 78" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" />
+    </svg>
+    {/* Синяя нормальная V спереди */}
+    <svg className="absolute w-64 h-64" viewBox="0 0 100 100" aria-hidden="true">
+      <path d="M 20 22 L 50 80 L 80 22" fill="none" stroke="#1E79AD" strokeWidth="3" strokeLinecap="round" />
+    </svg>
+  </div>
+);
 
 export default function TrainerCard({ trainer, onBook }: TrainerCardProps) {
   const [imageError, setImageError] = useState(false);
   const hasImage = trainer.avatar_url && !imageError;
+  const acceptsBookings = trainer.accepts_personal_bookings ?? true; // По умолчанию принимаем заявки
 
   // Формируем строку специализаций
   const specialtiesText = trainer.specialties && trainer.specialties.length > 0
     ? trainer.specialties.join(" • ")
     : null;
-
-  /* V-декорация — только если нет фото */
-  const VDecor = () => (
-    <div className="flex justify-center items-center w-full h-full relative">
-      {/* Белая перевёрнутая V сзади */}
-      <svg className="absolute w-64 h-64 opacity-45" viewBox="0 0 100 100" aria-hidden="true">
-        <path d="M 22 78 L 50 28 L 78 78" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" />
-      </svg>
-      {/* Синяя нормальная V спереди */}
-      <svg className="absolute w-64 h-64" viewBox="0 0 100 100" aria-hidden="true">
-        <path d="M 20 22 L 50 80 L 80 22" fill="none" stroke="#1E79AD" strokeWidth="3" strokeLinecap="round" />
-      </svg>
-    </div>
-  );
 
   return (
     <div className="
@@ -96,9 +84,19 @@ export default function TrainerCard({ trainer, onBook }: TrainerCardProps) {
         {/* Кнопка записи */}
         <button
           onClick={() => onBook(trainer.id)}
-          className="mt-8 bg-[#1E79AD] hover:bg-[#145073] text-white font-semibold py-3.5 rounded-xl transition shadow-lg"
+          disabled={!acceptsBookings}
+          className={`
+            mt-8 font-semibold py-3.5 rounded-xl transition shadow-lg
+            ${acceptsBookings
+              ? 'bg-[#1E79AD] hover:bg-[#145073] text-white'
+              : 'bg-gray-600 text-gray-300 cursor-not-allowed'
+            }
+          `}
         >
-          Записаться на тренировку
+          {acceptsBookings
+            ? "Записаться на тренировку"
+            : "Тренер не принимает заявки"
+          }
         </button>
       </div>
     </div>

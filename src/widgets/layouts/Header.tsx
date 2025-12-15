@@ -101,8 +101,8 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Логотип */}
-      <div className="flex items-center justify-center py-2 sm:py-3">
+      {/* Логотип и навигация */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center sm:gap-8 py-2 sm:py-3">
         <Link href="/" className="flex flex-col items-center leading-tight">
           <span className="text-lg sm:text-xl tracking-wide font-bold">
             ADRENALINE
@@ -111,6 +111,22 @@ export default function Header() {
             FITNESS
           </span>
         </Link>
+
+        {/* Навигационное меню */}
+        <nav className="flex items-center justify-center gap-4 sm:gap-6 mt-2 sm:mt-0">
+          <Link
+            href="/trainers"
+            className="text-sm text-white/80 hover:text-[#1E79AD] transition font-medium"
+          >
+            Тренеры
+          </Link>
+          <Link
+            href="/schedule"
+            className="text-sm text-white/80 hover:text-[#1E79AD] transition font-medium"
+          >
+            Расписание
+          </Link>
+        </nav>
       </div>
     </header>
   );

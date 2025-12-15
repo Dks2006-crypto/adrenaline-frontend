@@ -13,6 +13,7 @@ interface User {
   avatar?: string | null;
   avatar_url?: string | null;
   bio?: string;
+  accepts_personal_bookings?: boolean;
   metadata?: {
     age?: number;
     fitness_level?: string;

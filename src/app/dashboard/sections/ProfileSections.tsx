@@ -9,6 +9,7 @@ import { AxiosError } from "axios";
 import Cropper from "react-easy-crop";
 import { getCroppedImg } from "@/lib/cropImage";
 import EditProfileModal from "@/shared/ui/EditProfileModal";
+import { trainerApi } from "@/entities/trainer";
 
 export default function ProfileSection() {
   const { user, loadUser, logout } = useAuthStore();
@@ -24,6 +25,7 @@ export default function ProfileSection() {
   const [isUploading, setIsUploading] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUpdatingBookings, setIsUpdatingBookings] = useState(false);
 
   const handleAvatarClick = () => fileInputRef.current?.click();
 
@@ -45,6 +47,20 @@ export default function ProfileSection() {
   };
 
   const [editOpen, setEditOpen] = useState(false);
+
+  const handlePersonalBookingsToggle = async (accepts_personal_bookings: boolean) => {
+    setIsUpdatingBookings(true);
+    try {
+      await trainerApi.updatePersonalBookingsSetting(accepts_personal_bookings);
+      await loadUser();
+      toast.success(accepts_personal_bookings ? "Теперь вы принимаете заявки на персональные тренировки" : "Заявки на персональные тренировки отключены");
+    } catch (error) {
+      console.error('Failed to update personal bookings setting:', error);
+      toast.error("Не удалось обновить настройку");
+    } finally {
+      setIsUpdatingBookings(false);
+    }
+  };
 
   const onCropComplete = (_: unknown, cropped: { width: number; height: number; x: number; y: number }) =>
     setCroppedAreaPixels(cropped);
@@ -104,12 +120,45 @@ export default function ProfileSection() {
               <InfoRow label="Роль" value={isTrainer ? "Тренер" : "Клиент"} />
 
               {/* ТРЕНЕР */}
-              {isTrainer && user.bio && (
-                <div className="pt-6">
-                  <h3 className="mb-2 text-white/80">Биография:</h3>
-                  <p className="text-white/70 leading-relaxed whitespace-pre-line">
-                    {user.bio}
-                  </p>
+              {isTrainer && (
+                <div className="pt-6 space-y-4">
+                  {user.bio && (
+                    <div>
+                      <h3 className="mb-2 text-white/80">Биография:</h3>
+                      <p className="text-white/70 leading-relaxed whitespace-pre-line">
+                        {user.bio}
+                      </p>
+                    </div>
+                  )}
+                  
+                  {/* Переключатель персональных заявок */}
+                  <div className="border-t border-[#1E79AD] pt-4">
+                    <h3 className="mb-3 text-white/80">Персональные тренировки:</h3>
+                    <div className="flex items-center gap-4">
+                      <span className="text-white/60 text-sm">
+                        {(user.accepts_personal_bookings ?? true) ? "Принимаю заявки" : "Не принимаю заявки"}
+                      </span>
+                      <button
+                        onClick={() => handlePersonalBookingsToggle(!(user.accepts_personal_bookings ?? true))}
+                        disabled={isUpdatingBookings}
+                        className={`
+                          relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#1E79AD] focus:ring-offset-2
+                          ${(user.accepts_personal_bookings ?? true) ? 'bg-[#1E79AD]' : 'bg-gray-600'}
+                          ${isUpdatingBookings ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-80'}
+                        `}
+                      >
+                        <span
+                          className={`
+                            inline-block h-4 w-4 transform rounded-full bg-white transition-transform
+                            ${(user.accepts_personal_bookings ?? true) ? 'translate-x-6' : 'translate-x-1'}
+                          `}
+                        />
+                      </button>
+                    </div>
+                    <p className="text-white/50 text-xs mt-2">
+                      Включите, чтобы клиенты могли записываться к вам на персональные тренировки
+                    </p>
+                  </div>
                 </div>
               )}
 
