@@ -1,4 +1,7 @@
 import React from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/store/authStore';
 
 interface SidebarMenuProps {
   isOpen: boolean;
@@ -7,11 +10,110 @@ interface SidebarMenuProps {
 }
 
 const SidebarMenu: React.FC<SidebarMenuProps> = ({ isOpen, onClose, logout }) => {
-  const menuItems = [
-    { name: "Занятие | История", action: () => console.log("Занятие | История clicked") },
-    { name: "История занятий", action: () => console.log("История занятий clicked") },
-    { name: "Записи", action: () => console.log("Записи clicked") },
-  ];
+  const { user } = useAuthStore();
+  const router = useRouter();
+  const isTrainer = user?.role_id === 2;
+  const isAdmin = user?.role_id === 1;
+
+  // Определяем пункты меню в зависимости от роли пользователя
+  const getMenuItems = () => {
+    if (isAdmin) {
+      return [
+        {
+          name: "Расписание",
+          action: () => {
+            router.push('/schedule');
+            onClose();
+          }
+        },
+        {
+          name: "Админ-панель",
+          action: () => {
+            router.push('/admin');
+            onClose();
+          }
+        },
+        {
+          name: "Профиль",
+          action: () => {
+            router.push('/dashboard#profile');
+            onClose();
+          }
+        },
+      ];
+    } else if (isTrainer) {
+      return [
+        {
+          name: "Расписание",
+          action: () => {
+            router.push('/schedule');
+            onClose();
+          }
+        },
+        {
+          name: "История",
+          action: () => {
+            router.push('/dashboard#history');
+            onClose();
+          }
+        },
+        {
+          name: "Управление заявками",
+          action: () => {
+            router.push('/dashboard#bookings');
+            onClose();
+          }
+        },
+        {
+          name: "Профиль",
+          action: () => {
+            router.push('/dashboard#profile');
+            onClose();
+          }
+        },
+      ];
+    } else {
+      return [
+        {
+          name: "Расписание",
+          action: () => {
+            router.push('/schedule');
+            onClose();
+          }
+        },
+        {
+          name: "История",
+          action: () => {
+            router.push('/dashboard#history');
+            onClose();
+          }
+        },
+        {
+          name: "Мои записи",
+          action: () => {
+            router.push('/dashboard#bookings');
+            onClose();
+          }
+        },
+        {
+          name: "Мои абонементы",
+          action: () => {
+            router.push('/dashboard#memberships');
+            onClose();
+          }
+        },
+        {
+          name: "Профиль",
+          action: () => {
+            router.push('/dashboard#profile');
+            onClose();
+          }
+        },
+      ];
+    }
+  };
+
+  const menuItems = getMenuItems();
 
   return (
     // Позиционирование: Центрирование по вертикали, фиксированная высота.

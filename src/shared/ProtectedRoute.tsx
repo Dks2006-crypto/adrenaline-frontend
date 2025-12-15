@@ -32,7 +32,8 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   }
 
   if (!token || !user) {
-    return null
+    router.push("/login");
+    return null;
   }
 
   return <>{children}</>;

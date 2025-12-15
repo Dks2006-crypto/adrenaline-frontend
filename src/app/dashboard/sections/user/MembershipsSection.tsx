@@ -15,13 +15,38 @@ interface Membership {
     } | null;
 }
 
-const getStatusColor = (status: string) => {
+const getStatusConfig = (status: string) => {
   switch (status.toLowerCase()) {
-    case "active":   return "bg-emerald-100 text-emerald-800 border-emerald-200";
-    case "expired":  return "bg-red-100 text-red-800 border-red-200";
-    case "frozen":   return "bg-amber-100 text-amber-800 border-amber-200";
-    case "pending":  return "bg-blue-100 text-blue-800 border-blue-200";
-    default:         return "bg-gray-100 text-gray-800 border-gray-200";
+    case "active":   
+      return { 
+        text: "Активна", 
+        color: "bg-emerald-500/20 text-emerald-300 border-emerald-400/50",
+        glowColor: "shadow-emerald-500/20"
+      };
+    case "expired":  
+      return { 
+        text: "Истёк", 
+        color: "bg-red-500/20 text-red-300 border-red-400/50",
+        glowColor: "shadow-red-500/20"
+      };
+    case "frozen":   
+      return { 
+        text: "Заморожена", 
+        color: "bg-amber-500/20 text-amber-300 border-amber-400/50",
+        glowColor: "shadow-amber-500/20"
+      };
+    case "pending":  
+      return { 
+        text: "В ожидании", 
+        color: "bg-blue-500/20 text-blue-300 border-blue-400/50",
+        glowColor: "shadow-blue-500/20"
+      };
+    default:         
+      return { 
+        text: status, 
+        color: "bg-gray-500/20 text-gray-300 border-gray-400/50",
+        glowColor: "shadow-gray-500/20"
+      };
   }
 };
 
@@ -33,7 +58,12 @@ export default function MembershipsSection() {
 
   if (isLoading) {
     return (
-<div></div>
+      <section className="flex justify-center py-20">
+        <div className="w-full max-w-4xl border-2 border-[#1E79AD] rounded-2xl p-8 text-white relative bg-black/70 backdrop-blur">
+          <h2 className="text-center text-xl mb-10 opacity-90">Мои абонементы</h2>
+          <div className="text-center py-12 text-white/70">Загрузка абонементов...</div>
+        </div>
+      </section>
     );
   }
 
@@ -41,81 +71,109 @@ export default function MembershipsSection() {
   const expiredMemberships = memberships.filter(m => m.status === 'expired');
 
   return (
-    <section>
-        <h2 className="text-3xl font-bold mb-6 text-gray-900">Мои абонементы</h2>
+    <section className="flex justify-center py-20">
+      <div className="w-full max-w-6xl border-2 border-[#1E79AD] rounded-2xl p-8 text-white relative bg-black/70 backdrop-blur">
+        <h2 className="text-xl mb-10 opacity-90">Мои абонементы</h2>
         
         {activeMemberships.length === 0 && expiredMemberships.length === 0 ? (
-             <div className="text-gray-700 py-6 border-l-4 border-gray-200 bg-gray-50 p-4 rounded-xl">
-                 У вас пока нет абонементов. Купите первый на главной странице!
-             </div>
+          <div className="text-center py-12 bg-gradient-to-br from-[#1E79AD]/10 to-purple-600/10 border border-[#1E79AD]/30 rounded-2xl">
+            <div className="text-white/90 text-lg mb-2">У вас пока нет абонементов</div>
+            <div className="text-white/60">Купите первый на главной странице!</div>
+          </div>
         ) : (
-            <div className="space-y-8">
-                {/* Активные, замороженные и ожидающие */}
+          <div className="space-y-8">
+            {/* Активные, замороженные и ожидающие */}
+            {activeMemberships.length > 0 && (
+              <div>
+                <h3 className="text-lg font-semibold text-white/80 mb-6">Активные абонементы</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {activeMemberships.map((m) => (
-                        <div 
-                            key={m.id}
-                            className="bg-white rounded-2xl shadow-lg border-t-4 border-blue-500 p-6 hover:shadow-xl transition transform hover:-translate-y-1"
-                        >
-                            <h3 className="text-xl font-bold text-gray-900 mb-4">
-                                {m.service?.title || "Абонемент"}
-                            </h3>
+                  {activeMemberships.map((m) => {
+                    const status = getStatusConfig(m.status);
+                    return (
+                      <div 
+                        key={m.id}
+                        className={`bg-gradient-to-br from-black/60 to-black/40 backdrop-blur border border-[#1E79AD]/30 rounded-2xl p-6 hover:shadow-2xl hover:border-[#1E79AD]/60 transition-all duration-300 transform hover:-translate-y-1 ${status.glowColor}`}
+                      >
+                        <h4 className="text-lg font-bold text-white mb-4 leading-tight">
+                          {m.service?.title || "Абонемент"}
+                        </h4>
 
-                            <div className="space-y-3 text-sm">
-                                <div className="flex justify-between">
-                                <span className="text-gray-700">Статус:</span>
-                                <span className={`px-3 py-1 rounded-full font-medium text-sm border ${getStatusColor(m.status)}`}>
-                                    {m.status === "active" ? "Активна" :
-                                    m.status === "expired" ? "Истёк" :
-                                    m.status === "frozen" ? "Заморожена" : "В ожидании"}
-                                </span>
-                                </div>
+                        <div className="space-y-4">
+                          <div className="flex justify-between items-center">
+                            <span className="text-white/70">Статус:</span>
+                            <span className={`px-3 py-1 rounded-full font-medium text-sm border ${status.color}`}>
+                              {status.text}
+                            </span>
+                          </div>
 
-                                <div className="flex justify-between">
-                                <span className="text-gray-700">Осталось посещений:</span>
-                                <span className="font-medium text-gray-900">
-                                    {/* 🚨 ИСПРАВЛЕНИЕ 1: Используем remaining_visits */}
-                                    {m.remaining_visits !== null ? m.remaining_visits : "Безлимит"} 
-                                </span>
-                                </div>
+                          <div className="flex justify-between">
+                            <span className="text-white/70">Осталось посещений:</span>
+                            <span className="font-semibold text-white">
+                              {m.remaining_visits !== null ? m.remaining_visits : "Безлимит"} 
+                            </span>
+                          </div>
 
-                                <div className="flex justify-between">
-                                <span className="text-gray-700">Действует до:</span>
-                                <span className="font-medium text-gray-900">
-                                    {/* 🚨 ИСПРАВЛЕНИЕ 2: Используем end_date */}
-                                    {m.end_date ? new Date(m.end_date).toLocaleDateString("ru-RU") : "—"}
-                                </span>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                          <div className="flex justify-between">
+                            <span className="text-white/70">Действует до:</span>
+                            <span className="font-semibold text-white">
+                              {m.end_date ? new Date(m.end_date).toLocaleDateString("ru-RU") : "—"}
+                            </span>
+                          </div>
 
-                {/* Истекшие (в скрываемом блоке) */}
-                {expiredMemberships.length > 0 && (
-                    <details className="mt-8 border-t pt-4">
-                        <summary className="text-lg font-semibold text-gray-700 cursor-pointer">
-                            Показать истекшие абонементы ({expiredMemberships.length})
-                        </summary>
-                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
-                            {expiredMemberships.map((m) => (
+                          {/* Прогресс-бар для визуализации */}
+                          {m.remaining_visits !== null && (
+                            <div className="pt-3 border-t border-[#1E79AD]/30">
+                              <div className="flex justify-between text-xs text-white/60 mb-2">
+                                <span>Использовано</span>
+                                <span>{Math.max(0, (m.remaining_visits || 0) - (m.remaining_visits || 0))} / {m.remaining_visits}</span>
+                              </div>
+                              <div className="w-full bg-white/10 rounded-full h-2">
                                 <div 
-                                    key={m.id}
-                                    className="bg-gray-50 rounded-2xl shadow-sm border p-6 opacity-70"
-                                >
-                                     <h3 className="text-xl font-bold text-gray-700 mb-4">
-                                        {m.service?.title || "Абонемент"} (Истёк)
-                                    </h3>
-                                    <p className="text-sm text-gray-700">
-                                        Действовал до: {m.end_date ? new Date(m.end_date).toLocaleDateString("ru-RU") : "—"}
-                                    </p>
-                                </div>
-                            ))}
+                                  className="bg-gradient-to-r from-[#1E79AD] to-purple-500 h-2 rounded-full transition-all duration-500"
+                                  style={{ width: `${Math.max(0, 100 - ((m.remaining_visits || 0) / (m.remaining_visits || 1)) * 100)}%` }}
+                                ></div>
+                              </div>
+                            </div>
+                          )}
                         </div>
-                    </details>
-                )}
-            </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Истекшие (в скрываемом блоке) */}
+            {expiredMemberships.length > 0 && (
+              <details className="border-t border-[#1E79AD]/30 pt-6">
+                <summary className="text-lg font-semibold text-white/80 cursor-pointer hover:text-white transition-colors">
+                  Показать истекшие абонементы ({expiredMemberships.length})
+                </summary>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6">
+                  {expiredMemberships.map((m) => (
+                    <div 
+                      key={m.id}
+                      className="bg-gradient-to-br from-gray-800/40 to-gray-900/20 backdrop-blur border border-gray-600/30 rounded-2xl p-6 opacity-75 hover:opacity-90 transition-opacity"
+                    >
+                      <h4 className="text-lg font-bold text-gray-300 mb-4">
+                        {m.service?.title || "Абонемент"} (Истёк)
+                      </h4>
+                      <div className="space-y-2 text-sm">
+                        <p className="text-gray-400">
+                          Действовал до: {m.end_date ? new Date(m.end_date).toLocaleDateString("ru-RU") : "—"}
+                        </p>
+                        <p className="text-gray-500">
+                          Осталось посещений: {m.remaining_visits !== null ? m.remaining_visits : "Безлимит"}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </details>
+            )}
+          </div>
         )}
+      </div>
     </section>
   );
 }

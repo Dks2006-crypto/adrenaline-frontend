@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuthStore } from "@/store/authStore";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -13,7 +14,8 @@ import { trainerApi } from "@/entities/trainer";
 
 export default function ProfileSection() {
   const { user, loadUser, logout } = useAuthStore();
-
+  const router = useRouter();
+  
   const isTrainer = user?.role_id === 2;
   const meta = user?.metadata || {};
 
@@ -26,6 +28,11 @@ export default function ProfileSection() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUpdatingBookings, setIsUpdatingBookings] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
 
   const handleAvatarClick = () => fileInputRef.current?.click();
 
@@ -216,7 +223,7 @@ export default function ProfileSection() {
               />
 
               <button
-                onClick={logout}
+                onClick={handleLogout}
                 className="px-4 py-2 bg-red-600/80 hover:bg-red-700 transition rounded-xl text-sm"
               >
                 Выйти из аккаунта

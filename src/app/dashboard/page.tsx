@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuthStore } from "@/store/authStore";
+import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/shared/ProtectedRoute";
 import ProfileSection from "./sections/ProfileSections";
 import TrainerBookingsSection from "./sections/trainer/TrainerBookingSection";
@@ -8,17 +9,23 @@ import MembershipsSection from "./sections/user/MembershipsSection";
 import BookingsSection from "./sections/user/BookingsSection";
 import { useState } from "react";
 import SidebarMenu from "@/shared/ui/SidebarMenu";
-
+import HistorySection from "./sections/HistorySection";
 
 export default function Dashboard() {
   const { user, logout } = useAuthStore();
+  const router = useRouter();
   const isTrainer = user?.role_id === 2;
+  const isAdmin = user?.role_id === 1;
 
-
-  const [isMenuOpen, setIsMenuOpen] = useState(false); 
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeMenu = () => setIsMenuOpen(false);
   const contentShiftClass = isMenuOpen ? 'md:ml-64' : 'md:ml-0';
+
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
 
 
   return (
@@ -48,10 +55,10 @@ export default function Dashboard() {
       </button>
 
       {/* Вставляем компонент меню */}
-      <SidebarMenu 
-        isOpen={isMenuOpen} 
-        onClose={closeMenu} 
-        logout={logout} 
+      <SidebarMenu
+        isOpen={isMenuOpen}
+        onClose={closeMenu}
+        logout={handleLogout}
       />
 
       <div className="min-h-screen bg-[#262626]">
@@ -62,22 +69,41 @@ export default function Dashboard() {
               Привет, {user?.name || "друг"}!
             </h1>
             <button
-              onClick={logout}
+              onClick={handleLogout}
               className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-xl shadow-lg transition transform hover:scale-105"
             >
               Выйти из аккаунта
             </button>
           </div>
           <div className="space-y-16">
-            <ProfileSection />
-            {isTrainer ? (
+            <div id="profile">
+              <ProfileSection />
+            </div>
+            {isAdmin ? (
+              // 👈 Секции для администратора
+              null
+            ) : isTrainer ? (
               // 👈 Секции для тренера
-              <TrainerBookingsSection />
+              <>
+                <div id="bookings">
+                  <TrainerBookingsSection />
+                </div>
+                <div id="history">
+                  <HistorySection />
+                </div>
+              </>
             ) : (
               // 👈 Секции для клиента
               <>
-                <MembershipsSection />
-                <BookingsSection />
+                <div id="memberships">
+                  <MembershipsSection />
+                </div>
+                <div id="bookings">
+                  <BookingsSection />
+                </div>
+                <div id="history">
+                  <HistorySection />
+                </div>
               </>
             )}
           </div>

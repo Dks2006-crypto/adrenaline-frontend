@@ -1,46 +1,367 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useState, useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
-import { useState } from 'react';
+import { GroupClassListItem } from '@/features/group-classes/model/types';
 import toast from 'react-hot-toast';
-import { useMutation } from '@tanstack/react-query';
+import { useAuthStore } from '@/store/authStore';
+import Link from 'next/link';
+import ProtectedRoute from '@/shared/ProtectedRoute';
+
+// Интерфейс для фильтров
+interface ScheduleFilters {
+  search: string;
+  trainer: string;
+  dateFrom: string;
+  dateTo: string;
+  availableOnly: boolean;
+}
+
+// Интерфейс для тренеров
+interface Trainer {
+  id: number;
+  name: string;
+  last_name: string;
+}
 
 export default function SchedulePage() {
-  const [selectedClass, setSelectedClass] = useState(null);
-
-  const { data: classes, isLoading } = useQuery({
-    queryKey: ['classes'],
-    queryFn: () => api.get('/classes').then((res) => res.data),
+  const { user, token } = useAuthStore();
+  const queryClient = useQueryClient();
+  const [filters, setFilters] = useState<ScheduleFilters>({
+    search: '',
+    trainer: '',
+    dateFrom: '',
+    dateTo: '',
+    availableOnly: false,
   });
 
+  // Загрузка групповых занятий
+  const { data: groupClasses = [], isLoading: classesLoading } = useQuery<GroupClassListItem[]>({
+    queryKey: ['group-classes'],
+    queryFn: () => api.get('/group-classes').then((res) => res.data),
+  });
+
+  // Загрузка тренеров для фильтра (только если есть данные)
+  const { data: trainers = [] } = useQuery<Trainer[]>({
+    queryKey: ['trainers'],
+    queryFn: () => api.get('/users?role=trainer').then((res) => res.data),
+    enabled: true, // Всегда пытаемся загрузить, но обрабатываем пустой результат
+  });
+
+  // Мутация для записи на занятие
   const bookMutation = useMutation({
-    mutationFn: (formId: number) => api.post('/bookings', { form_id: formId }),
-    onSuccess: () => toast.success('Запись подтверждена'),
-    onError: () => toast.error('Нет мест или подписки'),
+    mutationFn: (classId: number) => 
+      api.post('/bookings', { group_class_id: classId }),
+    onSuccess: () => {
+      toast.success('Вы успешно записались на занятие!');
+      queryClient.invalidateQueries({ queryKey: ['group-classes'] });
+    },
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : 'Ошибка при записи на занятие';
+      toast.error(message);
+    },
   });
 
-  if (isLoading) return <div>Загрузка...</div>;
+  // Фильтрация занятий
+  const filteredClasses = useMemo(() => {
+    return groupClasses.filter((groupClass) => {
+      // Поиск по названию и описанию
+      if (filters.search) {
+        const searchLower = filters.search.toLowerCase();
+        const matchesSearch = 
+          groupClass.title.toLowerCase().includes(searchLower) ||
+          groupClass.description?.toLowerCase().includes(searchLower);
+        if (!matchesSearch) return false;
+      }
+
+      // Фильтр по тренеру (если выбран конкретный тренер)
+      if (filters.trainer && groupClass.trainer?.id.toString() !== filters.trainer) {
+        return false;
+      }
+
+      // Фильтр по дате начала
+      if (filters.dateFrom) {
+        const classDate = new Date(groupClass.starts_at);
+        const filterDate = new Date(filters.dateFrom);
+        if (classDate < filterDate) return false;
+      }
+
+      // Фильтр по дате окончания
+      if (filters.dateTo) {
+        const classDate = new Date(groupClass.starts_at);
+        const filterDate = new Date(filters.dateTo);
+        if (classDate > filterDate) return false;
+      }
+
+      // Фильтр только доступных
+      if (filters.availableOnly && groupClass.available_slots === 0) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [groupClasses, filters, trainers]);
+
+  const handleBookClass = (classId: number) => {
+    if (!token) {
+      toast.error('Необходимо войти в систему');
+      return;
+    }
+    bookMutation.mutate(classId);
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      search: '',
+      trainer: '',
+      dateFrom: '',
+      dateTo: '',
+      availableOnly: false,
+    });
+  };
+
+  if (!user) {
+    return (
+      <ProtectedRoute>
+        <div>Загрузка...</div>
+      </ProtectedRoute>
+    );
+  }
 
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-8">Расписание занятий</h1>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {classes?.map((cls: any) => (
-          <div key={cls.id} className="bg-white p-6 rounded-lg shadow-md">
-            <h3 className="text-xl font-bold mb-2">{cls.service.name}</h3>
-            <p>Дата: {cls.date}</p>
-            <p>Мест: {cls.available_slots}</p>
-            <button
-              onClick={() => bookMutation.mutate(cls.id)}
-              className="mt-4 bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
-              disabled={cls.available_slots <= 0}
-            >
-              Записаться
-            </button>
+    <ProtectedRoute>
+      <div className="min-h-screen bg-[#262626] py-8">
+        <div className="max-w-7xl mx-auto px-6">
+          {/* Заголовок */}
+          <div className="mb-12">
+            <div className="flex items-center gap-4 mb-4">
+              <Link 
+                href="/dashboard" 
+                className="text-[#1E79AD] hover:text-[#145073] transition-colors"
+              >
+                ← Назад в личный кабинет
+              </Link>
+            </div>
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              Расписание групповых тренировок
+            </h1>
+            <p className="text-white/70 text-lg">
+              Выберите удобное время и запишитесь на тренировку
+            </p>
           </div>
-        ))}
+
+          {/* Фильтры */}
+          <div className="bg-black/70 backdrop-blur border-2 border-[#1E79AD] rounded-2xl p-8 mb-8">
+            <h2 className="text-xl font-bold text-white mb-6">Фильтры</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {/* Поиск */}
+              <div>
+                <label className="block text-white/70 text-sm font-medium mb-2">
+                  Поиск
+                </label>
+                <input
+                  type="text"
+                  value={filters.search}
+                  onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                  placeholder="Название занятия..."
+                  className="w-full bg-black/50 border border-[#1E79AD]/30 rounded-lg px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:border-[#1E79AD] transition-colors"
+                />
+              </div>
+
+              {/* Тренер */}
+              <div>
+                <label className="block text-white/70 text-sm font-medium mb-2">
+                  Тренер
+                </label>
+                <select
+                  value={filters.trainer}
+                  onChange={(e) => setFilters({ ...filters, trainer: e.target.value })}
+                  className="w-full bg-black/50 border border-[#1E79AD]/30 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#1E79AD] transition-colors"
+                  disabled={trainers.length === 0}
+                >
+                  <option value="">
+                    {trainers.length === 0 ? 'Тренеры не найдены' : 'Все тренеры'}
+                  </option>
+                  {trainers.map((trainer) => (
+                    <option key={trainer.id} value={trainer.id.toString()}>
+                      {trainer.name} {trainer.last_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Дата от */}
+              <div>
+                <label className="block text-white/70 text-sm font-medium mb-2">
+                  Дата от
+                </label>
+                <input
+                  type="date"
+                  value={filters.dateFrom}
+                  onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}
+                  className="w-full bg-black/50 border border-[#1E79AD]/30 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#1E79AD] transition-colors"
+                />
+              </div>
+
+              {/* Дата до */}
+              <div>
+                <label className="block text-white/70 text-sm font-medium mb-2">
+                  Дата до
+                </label>
+                <input
+                  type="date"
+                  value={filters.dateTo}
+                  onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
+                  className="w-full bg-black/50 border border-[#1E79AD]/30 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#1E79AD] transition-colors"
+                />
+              </div>
+
+              {/* Только доступные */}
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="availableOnly"
+                  checked={filters.availableOnly}
+                  onChange={(e) => setFilters({ ...filters, availableOnly: e.target.checked })}
+                  className="w-5 h-5 text-[#1E79AD] bg-black/50 border-[#1E79AD]/30 rounded focus:ring-[#1E79AD] focus:ring-2"
+                />
+                <label htmlFor="availableOnly" className="ml-3 text-white/70">
+                  Только доступные
+                </label>
+              </div>
+            </div>
+
+            {/* Кнопки управления фильтрами */}
+            <div className="flex gap-4 mt-6">
+              <button
+                onClick={clearFilters}
+                className="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
+              >
+                Сбросить фильтры
+              </button>
+              <div className="text-white/70 flex items-center">
+                Найдено занятий: <span className="font-bold text-[#1E79AD] ml-2">{filteredClasses.length}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Список занятий */}
+          {classesLoading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1E79AD] mx-auto mb-4"></div>
+              <p className="text-white/70">Загрузка расписания...</p>
+            </div>
+          ) : filteredClasses.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="text-white/50 text-6xl mb-4">📅</div>
+              <h3 className="text-white text-xl font-semibold mb-2">Занятия не найдены</h3>
+              <p className="text-white/60">
+                {groupClasses.length === 0 
+                  ? 'В настоящее время групповые занятия недоступны'
+                  : 'Попробуйте изменить параметры фильтра'
+                }
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredClasses.map((groupClass) => {
+                const date = new Date(groupClass.starts_at);
+                const timeStart = date.toLocaleTimeString("ru-RU", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                });
+                const timeEnd = new Date(groupClass.ends_at).toLocaleTimeString("ru-RU", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                });
+
+                return (
+                  <div
+                    key={groupClass.id}
+                    className="bg-gradient-to-br from-black/60 to-black/40 backdrop-blur border border-[#1E79AD]/30 rounded-2xl p-6 hover:shadow-2xl hover:border-[#1E79AD]/60 transition-all duration-300 transform hover:-translate-y-1"
+                  >
+                    {/* Заголовок */}
+                    <div className="flex justify-between items-start mb-4">
+                      <h3 className="text-lg font-bold text-white leading-tight">
+                        {groupClass.title}
+                      </h3>
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        groupClass.available_slots > 0 
+                          ? 'bg-green-500/20 text-green-300 border border-green-400/50'
+                          : 'bg-red-500/20 text-red-300 border border-red-400/50'
+                      }`}>
+                        {groupClass.available_slots > 0 ? 'Доступно' : 'Нет мест'}
+                      </span>
+                    </div>
+
+                    {/* Информация */}
+                    <div className="space-y-3 text-sm text-white/80 mb-6">
+                      <div className="flex justify-between">
+                        <span className="text-white/60">Дата и время:</span>
+                        <span className="font-medium text-white">
+                          {date.toLocaleDateString("ru-RU")} в {timeStart}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between">
+                        <span className="text-white/60">Продолжительность:</span>
+                        <span className="font-medium">{timeStart} – {timeEnd}</span>
+                      </div>
+
+                      <div className="flex justify-between">
+                        <span className="text-white/60">Свободно мест:</span>
+                        <span className={`font-bold ${
+                          groupClass.available_slots <= 3 ? "text-red-400" : "text-green-400"
+                        }`}>
+                          {groupClass.available_slots}
+                        </span>
+                      </div>
+
+                      {groupClass.trainer && (
+                        <div className="flex justify-between">
+                          <span className="text-white/60">Тренер:</span>
+                          <span className="font-medium text-right line-clamp-1">
+                            {groupClass.trainer.name} {groupClass.trainer.last_name}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Кнопки */}
+                    <div className="flex gap-3">
+                      <Link
+                        href={`/group-classes/${groupClass.id}`}
+                        className="flex-1 text-center bg-[#1E79AD]/20 hover:bg-[#1E79AD]/30 text-[#1E79AD] py-3 rounded-lg font-semibold transition"
+                      >
+                        Подробнее
+                      </Link>
+
+                      {groupClass.available_slots > 0 ? (
+                        <button
+                          onClick={() => handleBookClass(groupClass.id)}
+                          disabled={bookMutation.isPending}
+                          className="flex-1 text-center bg-[#1E79AD] hover:bg-[#145073] disabled:bg-[#1E79AD]/50 text-white py-3 rounded-lg font-semibold transition"
+                        >
+                          {bookMutation.isPending ? 'Запись...' : 'Записаться'}
+                        </button>
+                      ) : (
+                        <button
+                          disabled
+                          className="flex-1 text-center bg-gray-700 text-gray-500 py-3 rounded-lg cursor-not-allowed font-medium"
+                        >
+                          Нет мест
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }

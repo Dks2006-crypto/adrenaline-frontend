@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { useRouter } from "next/navigation";
 import api from "@/lib/api";
 import toast from "react-hot-toast";
 
@@ -64,6 +65,7 @@ export const useAuthStore = create<AuthState>()(
 
         set({ token: null, user: null });
         delete api.defaults.headers.Authorization;
+        localStorage.removeItem("auth-storage");
 
         toast.success("Вы вышли");
       },

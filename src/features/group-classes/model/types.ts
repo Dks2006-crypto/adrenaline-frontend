@@ -6,9 +6,6 @@ export interface GroupClass {
   ends_at: string;
   capacity: number;
   available_slots: number;
-  price_cents: number;
-  currency: string;
-  recurrence_rule: string | null;
   trainer: {
     id: number;
     name: string;
@@ -32,8 +29,6 @@ export interface GroupClassListItem {
   ends_at: string;
   capacity: number;
   available_slots: number;
-  price_cents: number;
-  currency: string;
   trainer: {
     id: number;
     name: string;
