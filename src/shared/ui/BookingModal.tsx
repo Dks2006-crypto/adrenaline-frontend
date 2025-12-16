@@ -85,25 +85,25 @@ export default function BookingModal({
       onClick={onClose}
     >
       <div
-        className="bg-[#121212] border border-white/10 rounded-2xl w-full max-w-lg shadow-2xl flex flex-col"
+        className="bg-[#121212] border border-white/10 rounded-2xl w-full max-w-sm sm:max-w-lg shadow-2xl flex flex-col modal-responsive"
         style={{ maxHeight: "92vh" }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Заголовок */}
-        <div className="p-6 pb-4 text-center border-b border-white/10">
-          <h2 className="text-2xl font-bold text-white">
+        <div className="p-4 sm:p-6 pb-3 sm:pb-4 text-center border-b border-white/10">
+          <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white">
             {isPersonalBooking ? "Персональная тренировка" : "Запись на занятие"}
           </h2>
         </div>
 
         {/* Скроллируемый контент */}
-        <div className="flex-1 overflow-y-auto px-6 py-4">
-          <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-3 sm:py-4">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
             {isPersonalBooking && (
               <>
                 {/* Дата */}
                 <div>
-                  <label className="block text-white/80 text-sm font-medium mb-2">
+                  <label className="block text-white/80 text-xs sm:text-sm font-medium mb-2">
                     Желаемая дата <span className="text-red-400">*</span>
                   </label>
                   <input
@@ -112,20 +112,20 @@ export default function BookingModal({
                     onChange={(e) => setPreferredDate(e.target.value)}
                     min={new Date().toISOString().split("T")[0]}
                     required
-                    className="w-full px-4 py-3 bg-[#0b0b0b] border border-white/10 rounded-xl text-white focus:border-[#1E79AD] focus:ring-2 focus:ring-[#1E79AD]/50 transition"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-[#0b0b0b] border border-white/10 rounded-xl text-white focus:border-[#1E79AD] focus:ring-2 focus:ring-[#1E79AD]/50 transition text-sm"
                   />
                 </div>
 
                 {/* Время */}
                 <div>
-                  <label className="block text-white/80 text-sm font-medium mb-2">
+                  <label className="block text-white/80 text-xs sm:text-sm font-medium mb-2">
                     Желаемое время
                   </label>
                   <input
                     type="time"
                     value={preferredTime}
                     onChange={(e) => setPreferredTime(e.target.value)}
-                    className="w-full px-4 py-3 bg-[#0b0b0b] border border-white/10 rounded-xl text-white focus:border-[#1E79AD] focus:ring-2 focus:ring-[#1E79AD]/50 transition"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-[#0b0b0b] border border-white/10 rounded-xl text-white focus:border-[#1E79AD] focus:ring-2 focus:ring-[#1E79AD]/50 transition text-sm"
                   />
                 </div>
               </>
@@ -133,20 +133,20 @@ export default function BookingModal({
 
             {/* Комментарий */}
             <div>
-              <label className="block text-white/80 text-sm font-medium mb-2">
+              <label className="block text-white/80 text-xs sm:text-sm font-medium mb-2">
                 Дополнительно
               </label>
               <textarea
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                rows={4}
+                rows={3}
                 placeholder="Опыт тренировок, цели, пожелания..."
-                className="w-full px-4 py-3 bg-[#0b0b0b] border border-white/10 rounded-xl text-white focus:border-[#1E79AD] focus:ring-2 focus:ring-[#1E79AD]/50 transition resize-none"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-[#0b0b0b] border border-white/10 rounded-xl text-white focus:border-[#1E79AD] focus:ring-2 focus:ring-[#1E79AD]/50 transition resize-none text-sm"
               />
             </div>
 
             {/* Инфо-блок */}
-            <div className="p-4 bg-[#1E79AD]/10 border border-[#1E79AD]/30 rounded-xl text-[#1E79AD] text-sm">
+            <div className="p-3 sm:p-4 bg-[#1E79AD]/10 border border-[#1E79AD]/30 rounded-xl text-[#1E79AD] text-xs sm:text-sm">
               <p className="font-medium">Требуется активная подписка</p>
               <p className="mt-1 text-xs opacity-90">
                 {isPersonalBooking
@@ -157,7 +157,7 @@ export default function BookingModal({
 
             {/* Ошибка */}
             {mutation.isError && (
-              <div className="p-4 bg-red-900/50 border border-red-500 rounded-xl text-red-300 text-sm text-center">
+              <div className="p-3 sm:p-4 bg-red-900/50 border border-red-500 rounded-xl text-red-300 text-xs sm:text-sm text-center">
                 {(mutation.error as any).response?.data?.error || "Ошибка записи"}
               </div>
             )}
@@ -165,19 +165,19 @@ export default function BookingModal({
         </div>
 
         {/* Фиксированные кнопки внизу */}
-        <div className="p-6 pt-4 border-t border-white/10">
-          <div className="flex gap-4">
+        <div className="p-4 sm:p-6 pt-3 sm:pt-4 border-t border-white/10">
+          <div className="flex gap-3 sm:gap-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3.5 bg-[#0b0b0b] border border-white/10 text-white/80 rounded-xl hover:bg-white/5 transition font-medium"
+              className="flex-1 py-2.5 sm:py-3.5 bg-[#0b0b0b] border border-white/10 text-white/80 rounded-xl hover:bg-white/5 transition font-medium text-sm"
             >
               Отмена
             </button>
             <button
               onClick={handleSubmit}
               disabled={mutation.isPending || (isPersonalBooking && !preferredDate)}
-              className="flex-1 py-3.5 bg-[#1E79AD] text-white font-bold rounded-xl hover:bg-[#145073] disabled:bg-gray-700 disabled:cursor-not-allowed transition"
+              className="flex-1 py-2.5 sm:py-3.5 bg-[#1E79AD] text-white font-bold rounded-xl hover:bg-[#145073] disabled:bg-gray-700 disabled:cursor-not-allowed transition text-sm"
             >
               {mutation.isPending ? "Отправка..." : isPersonalBooking ? "Отправить запрос" : "Записаться"}
             </button>

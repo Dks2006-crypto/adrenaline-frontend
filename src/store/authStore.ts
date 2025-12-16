@@ -30,6 +30,7 @@ interface AuthState {
   logout: () => void;
   loadUser: () => Promise<void>;
   hasRole: (role: number) => boolean;
+  initializeAuth: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -79,10 +80,18 @@ export const useAuthStore = create<AuthState>()(
             // Просто очищаем состояние, НО НЕ ВЫЗЫВАЕМ logout()
             set({ token: null, user: null });
             delete api.defaults.headers.Authorization;
-            localStorage.removeItem("token");
+            localStorage.removeItem("auth-storage");
             // Можно показать тост
             toast.error("Сессия истекла");
           }
+        }
+      },
+
+      initializeAuth: async () => {
+        const { token } = get();
+        if (token && typeof window !== 'undefined') {
+          api.defaults.headers.Authorization = `Bearer ${token}`;
+          await get().loadUser();
         }
       },
 
@@ -91,7 +100,7 @@ export const useAuthStore = create<AuthState>()(
     {
       name: "auth-storage",
 
-      // ← ФИКС: сохраняем и юзера, и токен
+      // сохраняем и юзера, и токен
       partialize: (state) => ({
         token: state.token,
         user: state.user,
@@ -100,11 +109,13 @@ export const useAuthStore = create<AuthState>()(
   )
 );
 
-// восстановление токена и автоподгрузка
+// Автоматическая инициализация при загрузке
 if (typeof window !== 'undefined') {
-  const { token } = useAuthStore.getState();
-
+  const { token, initializeAuth } = useAuthStore.getState();
+  
   if (token && !window.location.pathname.includes('/login')) {
     api.defaults.headers.Authorization = `Bearer ${token}`;
+    // Асинхронно загружаем пользователя
+    initializeAuth();
   }
 }

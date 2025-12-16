@@ -50,12 +50,12 @@ export default function EditProfileModal({
 
   return (
     <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-      <div className="bg-black border border-[#1E79AD] rounded-2xl p-6 w-full max-w-md text-white">
-        <h3 className="text-xl mb-6">Редактирование профиля</h3>
+      <div className="bg-black border border-[#1E79AD] rounded-2xl p-4 sm:p-6 w-full max-w-sm sm:max-w-md text-white modal-responsive">
+        <h3 className="text-lg sm:text-xl mb-4 sm:mb-6">Редактирование профиля</h3>
 
         {/* КЛИЕНТ */}
         {!isTrainer && (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <Input label="Возраст" value={age} onChange={setAge} />
             <Input label="Уровень подготовки" value={level} onChange={setLevel} />
             <Input label="Цель" value={goal} onChange={setGoal} />
@@ -65,26 +65,26 @@ export default function EditProfileModal({
         {/* ТРЕНЕР */}
         {isTrainer && (
           <div>
-            <label className="text-sm opacity-70">Биография</label>
+            <label className="text-xs sm:text-sm opacity-70">Биография</label>
             <textarea
               value={bio}
               onChange={(e) => setBio(e.target.value)}
-              className="w-full mt-1 p-3 bg-black border border-white/20 rounded-lg min-h-[120px]"
+              className="w-full mt-1 p-2.5 sm:p-3 bg-black border border-white/20 rounded-lg min-h-[100px] sm:min-h-[120px] text-sm sm:text-base resize-none"
             />
           </div>
         )}
 
-        <div className="flex gap-3 mt-6">
+        <div className="flex gap-2 sm:gap-3 mt-4 sm:mt-6">
           <button
             onClick={onClose}
-            className="flex-1 py-3 border border-white/20 rounded-lg"
+            className="flex-1 py-2.5 sm:py-3 border border-white/20 rounded-lg text-sm"
           >
             Отмена
           </button>
           <button
             onClick={submit}
             disabled={loading}
-            className="flex-1 py-3 bg-[#1E79AD] rounded-lg"
+            className="flex-1 py-2.5 sm:py-3 bg-[#1E79AD] rounded-lg text-sm disabled:opacity-70"
           >
             {loading ? "Сохранение..." : "Сохранить"}
           </button>
@@ -105,11 +105,11 @@ function Input({
 }) {
   return (
     <div>
-      <label className="text-sm opacity-70">{label}</label>
+      <label className="text-xs sm:text-sm opacity-70">{label}</label>
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full mt-1 p-3 bg-black border border-white/20 rounded-lg"
+        className="w-full mt-1 p-2.5 sm:p-3 bg-black border border-white/20 rounded-lg text-sm sm:text-base"
       />
     </div>
   );

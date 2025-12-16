@@ -48,18 +48,18 @@ export default function Header() {
   return (
     <header className="w-full bg-black/90 text-white border-b border-white/10">
       {/* Верхняя панель */}
-      <div className="w-full px-4 sm:px-6 py-2 text-[12px] sm:text-[13px] opacity-90">
+      <div className="w-full px-4 sm:px-6 py-2 text-[11px] sm:text-[13px] opacity-90">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           
           {/* Контакты */}
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span>с 9:00 до 18:00</span>
+          <div className="flex flex-wrap items-center gap-x-2 sm:gap-x-3 gap-y-1">
+            <span className="hidden xs:inline">с 9:00 до 18:00</span>
             <span className="hidden sm:inline">•</span>
-            <a href={`tel:${settings.phone.replace(/[^+\d]/g, "")}`} className="hover:text-[#1E79AD] transition">
+            <a href={`tel:${settings.phone.replace(/[^+\d]/g, "")}`} className="hover:text-[#1E79AD] transition text-xs sm:text-sm">
                   {settings.phone}
                 </a>
             <span className="hidden md:inline">•</span>
-            <span className="hidden md:inline">
+            <span className="hidden md:inline text-xs">
               {settings.address}
             </span>
           </div>
@@ -70,13 +70,14 @@ export default function Header() {
               href="/login"
               className="
                 self-start sm:self-auto
-                px-3 sm:px-4
-                py-1.5
+                px-2 sm:px-4
+                py-1 sm:py-1.5
                 bg-[#2b2b2b]
                 hover:bg-[#145073]
                 transition
                 rounded-lg
                 text-xs sm:text-sm
+                text-center
               "
             >
               Войти
@@ -86,13 +87,14 @@ export default function Header() {
               href="/dashboard"
               className="
                 self-start sm:self-auto
-                px-3 sm:px-4
-                py-1.5
+                px-2 sm:px-4
+                py-1 sm:py-1.5
                 bg-[#1E79AD]
                 hover:bg-[#145073]
                 transition
                 rounded-lg
                 text-xs sm:text-sm
+                text-center
               "
             >
               Кабинет
@@ -102,27 +104,27 @@ export default function Header() {
       </div>
 
       {/* Логотип и навигация */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center sm:gap-8 py-2 sm:py-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center sm:gap-8 py-3 sm:py-4">
         <Link href="/" className="flex flex-col items-center leading-tight">
-          <span className="text-lg sm:text-xl tracking-wide font-bold">
+          <span className="text-base sm:text-lg lg:text-xl tracking-wide font-bold">
             ADRENALINE
           </span>
-          <span className="text-[9px] sm:text-[10px] font-light opacity-80 -mt-1">
+          <span className="text-[8px] sm:text-[9px] lg:text-[10px] font-light opacity-80 -mt-1">
             FITNESS
           </span>
         </Link>
 
         {/* Навигационное меню */}
-        <nav className="flex items-center justify-center gap-4 sm:gap-6 mt-2 sm:mt-0">
+        <nav className="flex items-center justify-center gap-3 sm:gap-6 mt-2 sm:mt-0">
           <Link
             href="/trainers"
-            className="text-sm text-white/80 hover:text-[#1E79AD] transition font-medium"
+            className="text-xs sm:text-sm text-white/80 hover:text-[#1E79AD] transition font-medium px-2 py-1"
           >
             Тренеры
           </Link>
           <Link
             href="/schedule"
-            className="text-sm text-white/80 hover:text-[#1E79AD] transition font-medium"
+            className="text-xs sm:text-sm text-white/80 hover:text-[#1E79AD] transition font-medium px-2 py-1"
           >
             Расписание
           </Link>

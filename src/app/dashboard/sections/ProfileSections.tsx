@@ -115,24 +115,24 @@ export default function ProfileSection() {
 
   return (
     <>
-      <section className="flex justify-center py-20">
-        <div className="w-full max-w-4xl border-2 border-[#1E79AD] rounded-2xl p-8 text-white relative bg-black/70 backdrop-blur">
-          <h2 className="text-center text-xl mb-10 opacity-90">Мой профиль</h2>
+      <section className="flex justify-center py-12 sm:py-16 lg:py-20">
+        <div className="w-full max-w-4xl border-2 border-[#1E79AD] rounded-2xl p-4 sm:p-6 lg:p-8 text-white relative bg-black/70 backdrop-blur">
+          <h2 className="text-center text-lg sm:text-xl mb-8 sm:mb-10 opacity-90">Мой профиль</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_220px] gap-10">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_220px] gap-6 sm:gap-8 lg:gap-10">
             {/* ЛЕВАЯ ЧАСТЬ */}
-            <div className="space-y-4 text-sm">
+            <div className="space-y-3 sm:space-y-4 text-xs sm:text-sm order-2 lg:order-1">
               <InfoRow label="Имя" value={user.name} />
               <InfoRow label="Email" value={user.email} />
               <InfoRow label="Роль" value={isTrainer ? "Тренер" : "Клиент"} />
 
               {/* ТРЕНЕР */}
               {isTrainer && (
-                <div className="pt-6 space-y-4">
+                <div className="pt-4 sm:pt-6 space-y-3 sm:space-y-4">
                   {user.bio && (
                     <div>
-                      <h3 className="mb-2 text-white/80">Биография:</h3>
-                      <p className="text-white/70 leading-relaxed whitespace-pre-line">
+                      <h3 className="mb-2 text-white/80 text-sm sm:text-base">Биография:</h3>
+                      <p className="text-white/70 leading-relaxed whitespace-pre-line text-xs sm:text-sm">
                         {user.bio}
                       </p>
                     </div>
@@ -140,24 +140,24 @@ export default function ProfileSection() {
                   
                   {/* Переключатель персональных заявок */}
                   <div className="border-t border-[#1E79AD] pt-4">
-                    <h3 className="mb-3 text-white/80">Персональные тренировки:</h3>
-                    <div className="flex items-center gap-4">
-                      <span className="text-white/60 text-sm">
+                    <h3 className="mb-3 text-white/80 text-sm sm:text-base">Персональные тренировки:</h3>
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <span className="text-white/60 text-xs sm:text-sm">
                         {(user.accepts_personal_bookings ?? true) ? "Принимаю заявки" : "Не принимаю заявки"}
                       </span>
                       <button
                         onClick={() => handlePersonalBookingsToggle(!(user.accepts_personal_bookings ?? true))}
                         disabled={isUpdatingBookings}
                         className={`
-                          relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#1E79AD] focus:ring-offset-2
+                          relative inline-flex h-5 w-9 sm:h-6 sm:w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#1E79AD] focus:ring-offset-2
                           ${(user.accepts_personal_bookings ?? true) ? 'bg-[#1E79AD]' : 'bg-gray-600'}
                           ${isUpdatingBookings ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-80'}
                         `}
                       >
                         <span
                           className={`
-                            inline-block h-4 w-4 transform rounded-full bg-white transition-transform
-                            ${(user.accepts_personal_bookings ?? true) ? 'translate-x-6' : 'translate-x-1'}
+                            inline-block h-3 w-3 sm:h-4 sm:w-4 transform rounded-full bg-white transition-transform
+                            ${(user.accepts_personal_bookings ?? true) ? 'translate-x-4 sm:translate-x-6' : 'translate-x-1'}
                           `}
                         />
                       </button>
@@ -171,7 +171,7 @@ export default function ProfileSection() {
 
               {/* КЛИЕНТ */}
               {!isTrainer && (
-                <div className="pt-6 space-y-2">
+                <div className="pt-4 sm:pt-6 space-y-2">
                   <ProfileItem
                     label="Возраст"
                     value={meta.age ? `${meta.age} лет` : "—"}
@@ -186,9 +186,9 @@ export default function ProfileSection() {
             </div>
 
             {/* ПРАВАЯ ЧАСТЬ */}
-            <div className="flex flex-col items-center gap-4">
+            <div className="flex flex-col items-center gap-3 sm:gap-4 order-1 lg:order-2">
               <div
-                className="relative w-40 h-40 rounded-full overflow-hidden border-2 border-[#1E79AD] cursor-pointer group"
+                className="relative w-32 h-32 sm:w-36 sm:h-36 lg:w-40 lg:h-40 rounded-full overflow-hidden border-2 border-[#1E79AD] cursor-pointer group"
                 onClick={handleAvatarClick}
               >
                 <Image
@@ -199,7 +199,7 @@ export default function ProfileSection() {
                   className="object-cover pointer-events-none"
                 />
 
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-sm pointer-events-none">
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-xs sm:text-sm pointer-events-none">
                   Сменить фото
                 </div>
               </div>
@@ -209,7 +209,7 @@ export default function ProfileSection() {
                   e.stopPropagation();
                   setEditOpen(true);
                 }}
-                className="px-4 py-2 bg-[#1E79AD] hover:bg-[#145073] transition rounded-xl text-sm"
+                className="px-3 sm:px-4 py-2 bg-[#1E79AD] hover:bg-[#145073] transition rounded-xl text-xs sm:text-sm w-full sm:w-auto"
               >
                 Редактировать профиль
               </button>
@@ -224,7 +224,7 @@ export default function ProfileSection() {
 
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 bg-red-600/80 hover:bg-red-700 transition rounded-xl text-sm"
+                className="px-3 sm:px-4 py-2 bg-red-600/80 hover:bg-red-700 transition rounded-xl text-xs sm:text-sm w-full sm:w-auto"
               >
                 Выйти из аккаунта
               </button>

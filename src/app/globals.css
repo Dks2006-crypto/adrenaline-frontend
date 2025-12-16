@@ -14,6 +14,101 @@
   animation: fadeIn .4s ease forwards;
 }
 
+/* Дополнительные адаптивные утилиты */
+@media (max-width: 475px) {
+  .xs\:inline { display: inline; }
+  .xs\:hidden { display: none; }
+  .xs\:text-xs { font-size: 0.75rem; line-height: 1rem; }
+  .xs\:px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+  .xs\:py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+}
+
+/* Улучшенная типографика для мобильных */
+@media (max-width: 640px) {
+  .text-responsive {
+    font-size: clamp(0.875rem, 2.5vw, 1rem);
+  }
+  
+  .heading-responsive {
+    font-size: clamp(1.5rem, 5vw, 2.25rem);
+  }
+}
+
+/* Улучшенные отступы для мобильных */
+@media (max-width: 768px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .section-padding {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+}
+
+/* Адаптивные сетки */
+.grid-responsive {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .grid-responsive {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+/* Адаптивные модалки */
+.modal-responsive {
+  width: 100%;
+  max-width: 90vw;
+  max-height: 90vh;
+}
+
+@media (min-width: 768px) {
+  .modal-responsive {
+    max-width: 500px;
+  }
+}
+
+/* Адаптивные кнопки */
+.btn-responsive {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+}
+
+@media (max-width: 640px) {
+  .btn-responsive {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* Скрытие элементов на очень маленьких экранах */
+@media (max-width: 360px) {
+  .hide-xs {
+    display: none;
+  }
+}
+
+/* Улучшенная прокрутка для мобильных */
+@media (max-width: 768px) {
+  .scroll-smooth {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Адаптивные изображения */
+.img-responsive {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
 /* @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -32,4 +127,26 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Улучшения для мобильных устройств */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  
+  /* Улучшение тач-интерфейса */
+  button,
+  .clickable {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Улучшение ввода текста на мобильных */
+  input,
+  textarea,
+  select {
+    font-size: 16px; /* Предотвращает зум на iOS */
+  }
 }

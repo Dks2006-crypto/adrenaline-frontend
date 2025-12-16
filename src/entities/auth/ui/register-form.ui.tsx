@@ -8,7 +8,7 @@ export function RegisterForm() {
   const { register, formState: { errors } } = form;
 
   return (
-    <div className="relative w-full max-w-md">
+    <div className="relative w-full max-w-sm sm:max-w-md mx-auto">
       {/* Неоновая тень сверху и снизу */}
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#1E79AD] to-transparent opacity-70" />
       <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#1E79AD] to-transparent opacity-70" />
@@ -20,26 +20,27 @@ export function RegisterForm() {
           bg-[#121212]/95
           backdrop-blur-xl
           rounded-3xl
-          p-8
+          p-6 sm:p-8
           border
           border-[#1E79AD]/30
           shadow-2xl
           shadow-[#1E79AD]/20
         "
       >
-        <h1 className="text-3xl font-bold text-white text-center mb-10">
+        <h1 className="text-2xl sm:text-3xl font-bold text-white text-center mb-8 sm:mb-10">
           Регистрация
         </h1>
 
         {/* Имя */}
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <input
             {...register("name")}
             type="text"
             placeholder="Имя"
             className="
               w-full
-              px-5 py-4
+              px-4 sm:px-5
+              py-3 sm:py-4
               bg-[#1a1a1a]
               border border-white/10
               rounded-2xl
@@ -49,20 +50,22 @@ export function RegisterForm() {
               focus:outline-none
               focus:ring-2 focus:ring-[#1E79AD]/30
               transition
+              text-sm sm:text-base
             "
           />
-          {errors.name && <p className="text-red-400 text-sm mt-2">{errors.name.message}</p>}
+          {errors.name && <p className="text-red-400 text-xs sm:text-sm mt-2">{errors.name.message}</p>}
         </div>
 
         {/* Email */}
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <input
             {...register("email")}
             type="email"
             placeholder="Email"
             className="
               w-full
-              px-5 py-4
+              px-4 sm:px-5
+              py-3 sm:py-4
               bg-[#1a1a1a]
               border border-white/10
               rounded-2xl
@@ -72,20 +75,22 @@ export function RegisterForm() {
               focus:outline-none
               focus:ring-2 focus:ring-[#1E79AD]/30
               transition
+              text-sm sm:text-base
             "
           />
-          {errors.email && <p className="text-red-400 text-sm mt-2">{errors.email.message}</p>}
+          {errors.email && <p className="text-red-400 text-xs sm:text-sm mt-2">{errors.email.message}</p>}
         </div>
 
         {/* Телефон */}
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <input
             {...register("phone")}
             type="tel"
             placeholder="Телефон"
             className="
               w-full
-              px-5 py-4
+              px-4 sm:px-5
+              py-3 sm:py-4
               bg-[#1a1a1a]
               border border-white/10
               rounded-2xl
@@ -95,20 +100,22 @@ export function RegisterForm() {
               focus:outline-none
               focus:ring-2 focus:ring-[#1E79AD]/30
               transition
+              text-sm sm:text-base
             "
           />
-          {errors.phone && <p className="text-red-400 text-sm mt-2">{errors.phone.message}</p>}
+          {errors.phone && <p className="text-red-400 text-xs sm:text-sm mt-2">{errors.phone.message}</p>}
         </div>
 
         {/* Пароль */}
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <input
             {...register("password")}
             type="password"
             placeholder="Пароль"
             className="
               w-full
-              px-5 py-4
+              px-4 sm:px-5
+              py-3 sm:py-4
               bg-[#1a1a1a]
               border border-white/10
               rounded-2xl
@@ -118,20 +125,22 @@ export function RegisterForm() {
               focus:outline-none
               focus:ring-2 focus:ring-[#1E79AD]/30
               transition
+              text-sm sm:text-base
             "
           />
-          {errors.password && <p className="text-red-400 text-sm mt-2">{errors.password.message}</p>}
+          {errors.password && <p className="text-red-400 text-xs sm:text-sm mt-2">{errors.password.message}</p>}
         </div>
 
         {/* Подтверждение пароля */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <input
             {...register("password_confirmation")}
             type="password"
             placeholder="Подтверждение пароля"
             className="
               w-full
-              px-5 py-4
+              px-4 sm:px-5
+              py-3 sm:py-4
               bg-[#1a1a1a]
               border border-white/10
               rounded-2xl
@@ -141,10 +150,11 @@ export function RegisterForm() {
               focus:outline-none
               focus:ring-2 focus:ring-[#1E79AD]/30
               transition
+              text-sm sm:text-base
             "
           />
           {errors.password_confirmation && (
-            <p className="text-red-400 text-sm mt-2">{errors.password_confirmation.message}</p>
+            <p className="text-red-400 text-xs sm:text-sm mt-2">{errors.password_confirmation.message}</p>
           )}
         </div>
 
@@ -154,7 +164,7 @@ export function RegisterForm() {
           disabled={isLoading}
           className="
             w-full
-            py-4
+            py-3 sm:py-4
             bg-[#1E79AD]
             hover:bg-[#14506d]
             text-white
@@ -165,13 +175,15 @@ export function RegisterForm() {
             transition
             disabled:opacity-70
             disabled:cursor-not-allowed
+            min-h-[44px] flex items-center justify-center
+            text-sm sm:text-base
           "
         >
           {isLoading ? "Регистрация..." : "Зарегистрироваться"}
         </button>
 
         {/* Ссылка на вход */}
-        <p className="mt-6 text-center text-white/70 text-sm">
+        <p className="mt-5 sm:mt-6 text-center text-white/70 text-xs sm:text-sm">
           Уже есть аккаунт?{" "}
           <Link href="/login" className="text-[#1E79AD] hover:text-[#1E79AD]/80 font-medium transition">
             Войти

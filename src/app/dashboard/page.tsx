@@ -33,28 +33,22 @@ export default function Dashboard() {
 
       <button
         onClick={toggleMenu}
-        // Изменено: top-1/2 - translate-y-1/2 убрано. Теперь top-1/2 - translate-y-[250px]
-        // top-1/2 - translate-y-[250px] это верхний край h-[500px] сайдбара.
-        className={`fixed top-1/2 -translate-y-[250px] z-50 bg-blue-600 hover:bg-blue-700 text-white p-2 shadow-lg transition-all duration-300 transform 
+        className={`fixed top-1/2 -translate-y-[250px] z-50 bg-blue-600 hover:bg-blue-700 text-white p-2 shadow-lg transition-all duration-300 transform
           ${isMenuOpen ? `left-64 rounded-tr-xl rounded-br-none` : 'left-0 rounded-r-xl'}
         `}
         aria-label={isMenuOpen ? "Закрыть меню" : "Открыть меню"}
-        // Важно: Когда сайдбар открыт, кнопка должна быть БЕЗ закругления со стороны сайдбара
       >
-        {/* Иконка стрелочки, меняющая направление */}
-        <svg 
-          className={`w-6 h-6 transition-transform duration-300 ${isMenuOpen ? 'rotate-180' : ''}`} 
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24" 
+        <svg
+          className={`w-5 h-5 sm:w-6 sm:h-6 transition-transform duration-300 ${isMenuOpen ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
           xmlns="http://www.w3.org/2000/svg"
         >
-          {/* Используем иконку, которая кажется "ручкой" или вкладкой */}
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>
         </svg>
       </button>
 
-      {/* Вставляем компонент меню */}
       <SidebarMenu
         isOpen={isMenuOpen}
         onClose={closeMenu}
@@ -62,28 +56,26 @@ export default function Dashboard() {
       />
 
       <div className="min-h-screen bg-[#262626]">
-        <div className="max-w-7xl mx-auto p-6 md:p-8 lg:p-12">
+        <div className="max-w-7xl mx-auto p-4 sm:p-6 md:p-8 lg:p-12">
           {/* Шапка */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-12 gap-6">
-            <h1 className="text-4xl md:text-5xl font-bold text-white">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 sm:mb-12 gap-4 sm:gap-6">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white">
               Привет, {user?.name || "друг"}!
             </h1>
             <button
               onClick={handleLogout}
-              className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-xl shadow-lg transition transform hover:scale-105"
+              className="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl shadow-lg transition transform hover:scale-105 text-sm sm:text-base w-full sm:w-auto"
             >
               Выйти из аккаунта
             </button>
           </div>
-          <div className="space-y-16">
+          <div className="space-y-12 sm:space-y-16">
             <div id="profile">
               <ProfileSection />
             </div>
             {isAdmin ? (
-              // 👈 Секции для администратора
               null
             ) : isTrainer ? (
-              // 👈 Секции для тренера
               <>
                 <div id="bookings">
                   <TrainerBookingsSection />
@@ -93,7 +85,6 @@ export default function Dashboard() {
                 </div>
               </>
             ) : (
-              // 👈 Секции для клиента
               <>
                 <div id="memberships">
                   <MembershipsSection />
