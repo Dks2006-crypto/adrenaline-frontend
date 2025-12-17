@@ -10,7 +10,7 @@ export const useGroupClass = (id: string | number) => {
     const fetchGroupClass = async () => {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
-        const response = await fetch(`${apiUrl}/api/group-classes/${id}`);
+        const response = await fetch(`${apiUrl}/group-classes/${id}`);
 
         if (!response.ok) {
           if (response.status === 404) {

@@ -25,7 +25,7 @@ export default function Hero() {
       try {
         const apiUrl =
           process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
-        const res = await fetch(`${apiUrl}/api/hero`);
+        const res = await fetch(`${apiUrl}/hero`);
         const data = await res.json();
 
         if (data.success) setHeroData(data.data);
