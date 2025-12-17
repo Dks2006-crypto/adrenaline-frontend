@@ -51,8 +51,8 @@ export default function SchedulePage() {
 
   // Мутация для записи на занятие
   const bookMutation = useMutation({
-    mutationFn: (classId: number) => 
-      api.post('/bookings', { group_class_id: classId }),
+    mutationFn: (classId: number) =>
+      api.post('/bookings', { class_id: classId }),
     onSuccess: () => {
       toast.success('Вы успешно записались на занятие!');
       queryClient.invalidateQueries({ queryKey: ['group-classes'] });
