@@ -151,11 +151,11 @@ export default function HistoryCard({ entry, isTrainer = false }: HistoryCardPro
         )}
 
         {/* Notes */}
-        {entry.notes && (
+        {entry.note && (
           <div className="pt-2 sm:pt-3 border-t border-white/10">
             <p className="text-white/60 text-xs mb-1">Заметки:</p>
             <p className="text-white/80 text-xs sm:text-sm italic line-clamp-2 overflow-hidden">
-              {entry.notes}
+              {entry.note}
             </p>
           </div>
         )}

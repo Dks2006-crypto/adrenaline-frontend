@@ -16,7 +16,7 @@ export default function EditProfileModal({
   const isTrainer = user?.role_id === 2;
   const meta = user?.metadata || {};
 
-  const [age, setAge] = useState(meta.age || "");
+  const [age, setAge] = useState(String(meta.age || ""));
   const [level, setLevel] = useState(meta.fitness_level || "");
   const [goal, setGoal] = useState(meta.goal || "");
   const [bio, setBio] = useState(user?.bio || "");

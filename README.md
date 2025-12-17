@@ -1,36 +1,102 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Adrenaline Fitness Frontend
 
-## Getting Started
+Frontend часть приложения для фитнес-клуба Adrenaline, построенная на Next.js 16.
 
-First, run the development server:
+## Технологии
+
+- Next.js 16
+- React 19
+- TypeScript
+- Tailwind CSS
+- Axios
+- Zustand
+- React Hook Form
+- @tanstack/react-query
+
+## Установка зависимостей
+
+```bash
+npm install
+```
+
+## Запуск в development режиме
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Приложение будет доступно по адресу [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Сборка проекта
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+```
 
-## Learn More
+## Запуск production версии
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Переменные окружения
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Создайте файл `.env.local` в корне проекта:
 
-## Deploy on Vercel
+```env
+NEXT_PUBLIC_API_URL=https://your-backend-url.com
+NEXT_PUBLIC_AUTH_TYPE=localstorage
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Деплой на Vercel
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Через GitHub
+
+1. Запушьте проект в репозиторий на GitHub
+2. Зайдите на [Vercel](https://vercel.com/)
+3. Создайте новый проект и подключите GitHub репозиторий
+4. Настройте переменные окружения в настройках проекта:
+   - `NEXT_PUBLIC_API_URL` - URL вашего backend API
+5. Нажмите Deploy
+
+### Через CLI
+
+1. Установите Vercel CLI:
+   ```bash
+   npm install -g vercel
+   ```
+
+2. Авторизуйтесь:
+   ```bash
+   vercel login
+   ```
+
+3. Деплой:
+   ```bash
+   vercel
+   ```
+
+## Production оптимизации
+
+- Включена компрессия
+- Отключены source maps
+- Удалены комментарии из production сборки
+- Настроены security headers
+- Оптимизированы изображения через Next.js Image Optimization
+
+## Структура проекта
+
+```
+src/
+├── app/              # App Router (Next.js 13+)
+├── entities/         # Бизнес-сущности
+├── features/         # Фичи приложения
+├── lib/              # Вспомогательные библиотеки
+├── shared/           # Общие компоненты
+├── store/            # Глобальное состояние
+└── widgets/          # Виджеты
+```
+
+## Контакты
+
+Для вопросов и предложений обращайтесь к команде разработки.

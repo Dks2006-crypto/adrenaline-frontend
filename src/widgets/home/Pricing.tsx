@@ -41,10 +41,10 @@ export default function Pricing() {
         // Если возвращает { data: [...] } — берём res.data.data
         const servicesData = Array.isArray(res.data)
           ? res.data
-          : res.data.data || [];
+          : (res.data as any)?.data || [];
 
         // Фильтруем только активные
-        const activeServices = servicesData.filter((s) => s.active);
+        const activeServices = servicesData.filter((s: Service) => s.active);
 
         setServices(activeServices);
       })

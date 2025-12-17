@@ -1,7 +1,23 @@
 import axios from 'axios';
 
+// Определяем базовый URL в зависимости от окружения
+const getBaseURL = () => {
+  // Проверяем, что мы в браузере
+  if (typeof window !== 'undefined') {
+    // Используем переменную из .env.production или .env
+    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+  }
+  
+  // Для серверной стороны используем переменную из окружения
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+};
+
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api',
+  baseURL: getBaseURL(),
+  timeout: 10000, // 10 секунд таймаут
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
 // Автоматически добавляем токен
@@ -27,6 +43,11 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Логируем ошибки в development
+    if (process.env.NODE_ENV === 'development') {
+      console.error('API Error:', error);
+    }
+    
     // Просто пробрасываем ошибку дальше — ничего не делаем автоматически
     return Promise.reject(error);
   }
