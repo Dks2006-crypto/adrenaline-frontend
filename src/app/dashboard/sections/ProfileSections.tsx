@@ -15,7 +15,7 @@ import { trainerApi } from "@/entities/trainer";
 export default function ProfileSection() {
   const { user, loadUser, logout } = useAuthStore();
   const router = useRouter();
-  
+
   const isTrainer = user?.role_id === 2;
   const meta = user?.metadata || {};
 
@@ -23,7 +23,12 @@ export default function ProfileSection() {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<{ width: number; height: number; x: number; y: number } | null>(null);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<{
+    width: number;
+    height: number;
+    x: number;
+    y: number;
+  } | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -55,39 +60,59 @@ export default function ProfileSection() {
 
   const [editOpen, setEditOpen] = useState(false);
 
-  const handlePersonalBookingsToggle = async (accepts_personal_bookings: boolean) => {
+  const handlePersonalBookingsToggle = async (
+    accepts_personal_bookings: boolean
+  ) => {
     setIsUpdatingBookings(true);
     try {
       await trainerApi.updatePersonalBookingsSetting(accepts_personal_bookings);
       await loadUser();
-      toast.success(accepts_personal_bookings ? "Теперь вы принимаете заявки на персональные тренировки" : "Заявки на персональные тренировки отключены");
+      toast.success(
+        accepts_personal_bookings
+          ? "Теперь вы принимаете заявки на персональные тренировки"
+          : "Заявки на персональные тренировки отключены"
+      );
     } catch (error) {
-      console.error('Failed to update personal bookings setting:', error);
+      console.error("Failed to update personal bookings setting:", error);
       toast.error("Не удалось обновить настройку");
     } finally {
       setIsUpdatingBookings(false);
     }
   };
 
-  const onCropComplete = (_: unknown, cropped: { width: number; height: number; x: number; y: number }) =>
-    setCroppedAreaPixels(cropped);
+  const onCropComplete = (
+    _: unknown,
+    cropped: { width: number; height: number; x: number; y: number }
+  ) => setCroppedAreaPixels(cropped);
 
   const uploadCroppedImage = async () => {
     if (!imageSrc || !croppedAreaPixels) return;
 
     setIsUploading(true);
     try {
-      const croppedFile = await getCroppedImg(imageSrc, croppedAreaPixels);
-      const formData = new FormData();
-      formData.append("avatar", croppedFile);
+      // Получаем обрезанное изображение (обычно это Blob)
+      const croppedBlob = await getCroppedImg(imageSrc, croppedAreaPixels);
 
-      await api.post("/me/avatar", formData);
+      // Создаем FormData
+      const formData = new FormData();
+
+      // Превращаем Blob в File или просто добавляем имя файла третьим аргументом
+      // Это критически важно для Laravel!
+      formData.append("avatar", croppedBlob, "avatar.jpg");
+
+      // Отправляем на сервер
+      await api.post("/me/avatar", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
       toast.success("Аватар обновлён!");
       await loadUser();
       setIsModalOpen(false);
     } catch (error: unknown) {
-      console.error('Avatar upload error:', error);
-      
+      console.error("Avatar upload error:", error);
+
       if (error instanceof AxiosError && error.response) {
         if (error.response.status === 422) {
           const errors = error.response.data.errors;
@@ -101,7 +126,13 @@ export default function ProfileSection() {
         } else if (error.response.status === 413) {
           toast.error("Файл слишком большой");
         } else {
-          toast.error(`Ошибка загрузки: ${error.response.data?.message || error.message || 'Неизвестная ошибка'}`);
+          toast.error(
+            `Ошибка загрузки: ${
+              error.response.data?.message ||
+              error.message ||
+              "Неизвестная ошибка"
+            }`
+          );
         }
       } else {
         toast.error("Ошибка загрузки");
@@ -117,7 +148,9 @@ export default function ProfileSection() {
     <>
       <section className="flex justify-center py-12 sm:py-16 lg:py-20">
         <div className="w-full max-w-4xl border-2 border-[#1E79AD] rounded-2xl p-4 sm:p-6 lg:p-8 text-white relative bg-black/70 backdrop-blur">
-          <h2 className="text-center text-lg sm:text-xl mb-8 sm:mb-10 opacity-90">Мой профиль</h2>
+          <h2 className="text-center text-lg sm:text-xl mb-8 sm:mb-10 opacity-90">
+            Мой профиль
+          </h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_220px] gap-6 sm:gap-8 lg:gap-10">
             {/* ЛЕВАЯ ЧАСТЬ */}
@@ -131,39 +164,62 @@ export default function ProfileSection() {
                 <div className="pt-4 sm:pt-6 space-y-3 sm:space-y-4">
                   {user.bio && (
                     <div>
-                      <h3 className="mb-2 text-white/80 text-sm sm:text-base">Биография:</h3>
+                      <h3 className="mb-2 text-white/80 text-sm sm:text-base">
+                        Биография:
+                      </h3>
                       <p className="text-white/70 leading-relaxed whitespace-pre-line text-xs sm:text-sm">
                         {user.bio}
                       </p>
                     </div>
                   )}
-                  
+
                   {/* Переключатель персональных заявок */}
                   <div className="border-t border-[#1E79AD] pt-4">
-                    <h3 className="mb-3 text-white/80 text-sm sm:text-base">Персональные тренировки:</h3>
+                    <h3 className="mb-3 text-white/80 text-sm sm:text-base">
+                      Персональные тренировки:
+                    </h3>
                     <div className="flex items-center gap-3 sm:gap-4">
                       <span className="text-white/60 text-xs sm:text-sm">
-                        {(user.accepts_personal_bookings ?? true) ? "Принимаю заявки" : "Не принимаю заявки"}
+                        {user.accepts_personal_bookings ?? true
+                          ? "Принимаю заявки"
+                          : "Не принимаю заявки"}
                       </span>
                       <button
-                        onClick={() => handlePersonalBookingsToggle(!(user.accepts_personal_bookings ?? true))}
+                        onClick={() =>
+                          handlePersonalBookingsToggle(
+                            !(user.accepts_personal_bookings ?? true)
+                          )
+                        }
                         disabled={isUpdatingBookings}
                         className={`
                           relative inline-flex h-5 w-9 sm:h-6 sm:w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#1E79AD] focus:ring-offset-2
-                          ${(user.accepts_personal_bookings ?? true) ? 'bg-[#1E79AD]' : 'bg-gray-600'}
-                          ${isUpdatingBookings ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-80'}
+                          ${
+                            user.accepts_personal_bookings ?? true
+                              ? "bg-[#1E79AD]"
+                              : "bg-gray-600"
+                          }
+                          ${
+                            isUpdatingBookings
+                              ? "opacity-50 cursor-not-allowed"
+                              : "hover:opacity-80"
+                          }
                         `}
                       >
                         <span
                           className={`
                             inline-block h-3 w-3 sm:h-4 sm:w-4 transform rounded-full bg-white transition-transform
-                            ${(user.accepts_personal_bookings ?? true) ? 'translate-x-4 sm:translate-x-6' : 'translate-x-1'}
+                            ${
+                              user.accepts_personal_bookings ?? true
+                                ? "translate-x-4 sm:translate-x-6"
+                                : "translate-x-1"
+                            }
                           `}
                         />
                       </button>
                     </div>
                     <p className="text-white/50 text-xs mt-2">
-                      Включите, чтобы клиенты могли записываться к вам на персональные тренировки
+                      Включите, чтобы клиенты могли записываться к вам на
+                      персональные тренировки
                     </p>
                   </div>
                 </div>
